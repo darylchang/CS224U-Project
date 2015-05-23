@@ -33,6 +33,7 @@ def parse(filename, stripPunct=True, stemRule=None, lemmatize=False):
 
 		return words
 
+# Maps from NLTK POS tags to WordNet POS tags
 def wordnetPosCode(tag):
     if tag.startswith('NN'):
         return wordnet.NOUN
