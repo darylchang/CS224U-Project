@@ -6,7 +6,7 @@ from nltk.tokenize import RegexpTokenizer
 # Parses text documents into a list of tokens.
 # Handles multiple file formats.
 
-def parse(filename, stripPunct=True, stemRule=None, lemmatize=False):
+def parse(filename, stripPunct=True, stemRule=None, lemmatize=True):
 	with open (filename, 'r') as f:
 		text = f.read()
 
@@ -33,7 +33,7 @@ def parse(filename, stripPunct=True, stemRule=None, lemmatize=False):
 
 		return words
 
-# Maps from NLTK POS tags to WordNet POS tags
+# Maps from NLTK POS tags to WordNet POS tagsC
 def wordnetPosCode(tag):
     if tag.startswith('NN'):
         return wordnet.NOUN
@@ -47,7 +47,7 @@ def wordnetPosCode(tag):
         return wordnet.NOUN
 
 def main():
-	parse('data/litReview.txt', stripPunct=False)#lemmatize=True)
+	parse('data/litReview.txt', lemmatize=True)
 
 if __name__=='__main__':
 	main()
