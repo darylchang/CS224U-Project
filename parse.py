@@ -6,7 +6,7 @@ from nltk.tokenize import RegexpTokenizer
 # Parses text documents into a list of tokens.
 # Handles multiple file formats.
 
-def parse(filename, stripPunct=True, stemRule=None, lemmatize=False):
+def parse(filename, stripPunct=True, stemRule=None, lemmatize=True):
 	with open (filename, 'r') as f:
 		text = f.read()
 
