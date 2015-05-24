@@ -1,7 +1,7 @@
 import networkx
 import numpy as np 
 from collections import defaultdict
-from parse import parse 
+from parse import tokenize 
 
 ####### Create the adjacency matrix first and then a graph based on it #######
 #cooccurence by N sized sliding window
@@ -11,6 +11,7 @@ from parse import parse
 
 
 def slidingWindowMatrix(wordList, N):
+	print wordList
 	numWords = len(wordList)
 	vocab = list(set(wordList))
 	vocabSize = len(vocab)
@@ -37,18 +38,22 @@ def RakeMatrix(wordList, delimiters):
 			beg = idx+1
 	cooccurenceDict = defaultdict(lambda:0)
 	for frag in fragments:
-		window = list(set(frag))
-		window_len = len(window)
-		for i1 in range(0, window_len):
-			for i2 in range(i1, window_len):
-				cooccurenceDict[window[i1], window[i2]] += 1
+		if len(frag) > 0:
+			print frag
+			window = list(set(frag))
+			window_len = len(window)
+			for i1 in range(0, window_len):
+				for i2 in range(i1, window_len):
+					cooccurenceDict[window[i1], window[i2]] += 1
 	return cooccurenceDict, len(cooccurenceDict)
 
-fileName = 'data/yeastsamp.txt'
-# windowWordArray = parse(fileName)
+fileName = 'data/Handwritten/yeastsamp.txt'
+fileText = open(fileName).read()
+# windowWordArray = tokenize(fileText)
 # print slidingWindowMatrix(windowWordArray, 5)
-rakeWordArray = parse(fileName, stripPunct=False)
-delimiters = set(['.', ',', 'the'])
+rakeWordArray = tokenize(fileText, stripPunct=False)
+stopWords = ['a', 'about', 'an', 'are', 'as','at','be','by','for','from','how','in','is','it','of','on','or','that','the','this','to','was','what','when','where','who','will','with','the']
+delimiters = set(['.', ','] + stopWords)
 print RakeMatrix(rakeWordArray, delimiters)
 
 
