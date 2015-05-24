@@ -1,10 +1,12 @@
 from baseline import *
-from parse import handwritten_data_reader
+from parse import handwritten_data_reader, inspec_data_reader
 
-
-DATASETS = {
+DATASETS = ['Handwritten', 'Inspec']#, 'DUC-2001']
+READERS = {
     'Handwritten': handwritten_data_reader,
+    'Inspec': inspec_data_reader,
 }
+
 
 def F1(precision, recall):
     if precision + recall == 0:
@@ -32,16 +34,15 @@ def evaluate_extractor_on_reader(extractor, reader, **kwargs):
 def print_results(results):
     print '%-14s%-12s%-12s%-12s' % ('Dataset', 'Precision', 'Recall', 'F1')
     print '------------------------------------------'
-    for dataset in results:
+    for dataset in DATASETS:
         precision, recall, f1 = results[dataset]
         print '%-14s%-.2f%-8s%-.2f%-8s%-.2f\n' % (dataset, precision, '', recall, '', f1)
     print '=========================================='
 
-
 def evaluate_extractor(extractor, **kwargs):
     results = {}
     for dataset in DATASETS:
-        results[dataset] = evaluate_extractor_on_reader(extractor, DATASETS[dataset], **kwargs)
+        results[dataset] = evaluate_extractor_on_reader(extractor, READERS[dataset], **kwargs)
     print_results(results)
 
 if __name__=='__main__':
