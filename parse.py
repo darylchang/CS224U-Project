@@ -64,7 +64,7 @@ def handwritten_data_reader(**kwargs):
             label_line = f.readline().decode(ENCODING)
             text = f.read().decode(ENCODING)
         labels = get_semicolon_separated_labels(label_line)
-        examples.append((tokenize(text, **kwargs), labels))
+        examples.append((data_dir + filename, tokenize(text, **kwargs), labels))
     return examples
 
 def inspec_data_reader(**kwargs):
@@ -81,7 +81,7 @@ def inspec_data_reader(**kwargs):
         with open(data_dir + labels_file, 'r') as f:
             label_text = f.read().decode(ENCODING)
         labels = get_semicolon_separated_labels(label_text)
-        examples.append((tokenize(text, **kwargs), labels))
+        examples.append((data_dir + abstract_file, tokenize(text, **kwargs), labels))
     return examples
 
 def process_duc_labels(labels_lines):
@@ -109,7 +109,7 @@ def duc_data_reader(**kwargs):
         with open(data_dir + document_filename, 'r') as document:
             text = document.read().decode(ENCODING)
         article_text = process_duc_text(text)
-        examples.append((tokenize(article_text, **kwargs), labels[document_filename]))
+        examples.append((data_dir + document_filename, tokenize(article_text, **kwargs), labels[document_filename]))
     return examples
 
 if __name__=='__main__':
