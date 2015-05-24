@@ -1,10 +1,3 @@
-********************************************************************************************************************************************************
-If you want to use this dataset in your own research work, please cite the following paper:
-Xiaojun Wan and Jianguo Xiao: "Single Document Keyphrase Extraction Using Neighborhood Knowledge", In Proceedings of AAAI-08, pp.855-860, 2008. 
-Notice: Only the text embraced by the first tag pair <TEXT></TEXT> is extracted from the original document for keyphrase extraction in our experiments.
-********************************************************************************************************************************************************
-Line Format: DUC2001DocName@Keyphrase1;Keyphrase2;...;
-********************************************************************************************************************************************************
 FT923-5089@hurricane andrew;florida;louisiana;president george bush;election campaign;emergency relief;disaster;
 FT923-5267@hurricane andrew;property-casualty industry;insurance claims;property claims;insurance industry;insured losses;florida losses;
 FT923-5797@hurricane andrew;florida;louisiana;storm-related injuries;widespread destruction;massive rebuilding effort;federal emergency;

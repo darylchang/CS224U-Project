@@ -48,6 +48,9 @@ def tokenize(text, stripPunct=True, stemRule=None, lemmatize=False):
 def clean_label(label):
     return ' '.join(label.strip().lower().split())
 
+def get_semicolon_separated_labels(label_text):
+    return set([clean_label(label) for label in label_text.strip().split(';') if label])
+
 def handwritten_data_reader(**kwargs):
     # Simple data format for handwritten document/keyword examples. The first
     # line of each file listed in handwritten_docs.txt is taken to be 
@@ -60,7 +63,7 @@ def handwritten_data_reader(**kwargs):
         with open(data_dir + filename, 'r') as f:
             label_line = f.readline().decode(ENCODING)
             text = f.read().decode(ENCODING)
-        labels = set([clean_label(label) for label in label_line.split(';') if label])
+        labels = get_semicolon_separated_labels(label_line)
         examples.append((tokenize(text, **kwargs), labels))
     return examples
 
@@ -77,17 +80,39 @@ def inspec_data_reader(**kwargs):
             text = f.read().decode(ENCODING)
         with open(data_dir + labels_file, 'r') as f:
             label_text = f.read().decode(ENCODING)
-        labels = set([clean_label(label) for label in label_text.strip().split(';') if label])
+        labels = get_semicolon_separated_labels(label_text)
         examples.append((tokenize(text, **kwargs), labels))
-
     return examples
 
+def process_duc_labels(labels_lines):
+    labels = {}
+    for line in labels_lines:
+        document, label_text = line.split('@')
+        labels[document] = get_semicolon_separated_labels(label_text)
+    return labels
+
+def process_duc_text(text):
+    # Following usage in literature, only consider text in DUC-2001 dataset
+    # articles between the <TEXT> tags.
+    return text[text.find("<TEXT>") + len("<TEXT>") : text.rfind("</TEXT>")]
+
 def duc_data_reader(**kwargs):
-
+    data_dir = 'data/DUC2001/'
+    with open(data_dir + 'documents.txt') as documents_list:
+        document_filenames = [filename.strip() for filename in documents_list.readlines()]
+    with open(data_dir + 'annotations.txt', 'r') as labels_file:
+        labels_lines = [line.decode(ENCODING).strip() for line in labels_file.readlines()]
+    
     examples = []
-
+    labels = process_duc_labels(labels_lines)
+    for document_filename in document_filenames:
+        with open(data_dir + document_filename, 'r') as document:
+            text = document.read().decode(ENCODING)
+        article_text = process_duc_text(text)
+        examples.append((tokenize(article_text, **kwargs), labels[document_filename]))
     return examples
 
 if __name__=='__main__':
     # print handwritten_data_reader(lemmatize=False)
-    print inspec_data_reader()[:1]
+    # print inspec_data_reader()[:1]
+    print duc_data_reader()[0]

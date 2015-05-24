@@ -35,7 +35,7 @@ def evaluate_extractor_on_reader(extractor, reader, **kwargs):
 
 def print_results(results):
     print '%-14s%-12s%-12s%-12s' % ('Dataset', 'Precision', 'Recall', 'F1')
-    print '-------------------------------------------'
+    print '-------------------------------------------\n'
     for dataset in DATASETS:
         precision, recall, f1 = results[dataset]
         print '%-14s%-.3f%-7s%-.3f%-7s%-.3f\n' % (dataset, precision, '', recall, '', f1)
