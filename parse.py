@@ -82,6 +82,12 @@ def inspec_data_reader(**kwargs):
 
     return examples
 
+def duc_data_reader(**kwargs):
+
+    examples = []
+
+    return examples
+
 if __name__=='__main__':
     # print handwritten_data_reader(lemmatize=False)
     print inspec_data_reader()[:1]
