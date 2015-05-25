@@ -21,13 +21,13 @@ def compute_stats(tp, fp, fn):
     recall = 0. if tp + fn == 0 else tp / (tp + fn)
     return (precision, recall, F1(precision, recall))
 
-def evaluate_extractor_on_reader(extractor, reader, **kwargs):
-    examples = reader(**kwargs)
+def evaluate_extractor_on_reader(extractor, reader):
+    examples = reader()
     tp, fp, fn = 0., 0., 0.
     mistakes = []
     
-    for filename, tokens, labels in examples:
-        extracted_labels = extractor(tokens)
+    for filename, text, labels in examples:
+        extracted_labels = extractor.extract_keywords(text)
         for extracted_label in extracted_labels:
             if extracted_label in labels:
                 tp += 1
@@ -61,11 +61,11 @@ def output_mistakes(mistakes_list):
             f.write('Missed labels: %s\n\n' % (', '.join(missed_labels)))
             f.write('Extraneous labels: %s\n' % (', '.join(extraneous_labels)))
 
-def evaluate_extractor(extractor, **kwargs):
+def evaluate_extractor(extractor):
     results = {}
     mistakes_list = []
     for dataset in DATASETS:
-        reader_results, mistakes = evaluate_extractor_on_reader(extractor, READERS[dataset], **kwargs)
+        reader_results, mistakes = evaluate_extractor_on_reader(extractor, READERS[dataset])
         results[dataset] = reader_results
         mistakes_list += mistakes
     print_results(results)
