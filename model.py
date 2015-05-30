@@ -17,7 +17,7 @@ class BaseModel:
     def tokenize(self, text):
         # Strip punctuation if unneeded for co-occurrence counts
         if self.stripPunct:
-            tokenizer = RegexpTokenizer(r'\w+')
+            tokenizer = RegexpTokenizer(r'\w+') # TODO: Account for hypenated words
             tokens = tokenizer.tokenize(text)
         else:
             tokens = [word for sent in nltk.sent_tokenize(text) for word in nltk.word_tokenize(sent)]

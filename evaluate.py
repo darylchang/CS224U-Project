@@ -84,7 +84,7 @@ def output_mistakes(mistakes_list, verbose):
             outputStr += 'Correct labels: %s\n\n' % (', '.join(correct_labels))
             outputStr += 'Missed labels: %s\n\n' % (', '.join(missed_labels))
             outputStr += 'Extraneous labels: %s\n' % (', '.join(extraneous_labels))
-        f.write(outputStr)
+        f.write(outputStr.encode('utf-8'))
         if verbose:
             print outputStr
 
