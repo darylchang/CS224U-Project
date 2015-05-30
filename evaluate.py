@@ -24,7 +24,7 @@ def compute_stats(tp, fp, fn):
     recall = 0. if tp + fn == 0 else tp / (tp + fn)
     return (precision, recall, F1(precision, recall))
 
-def evaluate_extractor_on_dataset(extractor, dataset):
+def evaluate_extractor_on_dataset(extractor, dataset, numExamples):
     reader = READERS[dataset]
     examples = reader()
     tp, fp, fn = 0., 0., 0.
@@ -33,7 +33,7 @@ def evaluate_extractor_on_dataset(extractor, dataset):
     num_correct_r_labels, total_gold_labels = 0, 0
     
     sys.stdout.write('Evaluating extractor on %s dataset' % (dataset))
-    for filename, text, gold_labels in examples:
+    for filename, text, gold_labels in examples[:numExamples]:
         sys.stdout.write('.')
         sys.stdout.flush()
 
@@ -84,11 +84,11 @@ def output_mistakes(mistakes_list):
             f.write('Missed labels: %s\n\n' % (', '.join(missed_labels)))
             f.write('Extraneous labels: %s\n' % (', '.join(extraneous_labels)))
 
-def evaluate_extractor(extractor):
+def evaluate_extractor(extractor, numExamples):
     results = {}
     mistakes_list = []
     for dataset in DATASETS:
-        r_precision, (precision, recall, f1), mistakes = evaluate_extractor_on_dataset(extractor, dataset)
+        r_precision, (precision, recall, f1), mistakes = evaluate_extractor_on_dataset(extractor, dataset, numExamples)
         results[dataset] = (r_precision, precision, recall, f1)
         mistakes_list += mistakes
     print_results(results)

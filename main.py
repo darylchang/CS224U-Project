@@ -4,4 +4,4 @@ from nltk.corpus import wordnet
 import nltk
 
 model = DegreeCentralityModel(synFilter=[wordnet.NOUN, wordnet.ADJ])
-model.evaluate()
+model.evaluate(numExamples=5)
