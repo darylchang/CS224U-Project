@@ -10,7 +10,7 @@ class DegreeCentralityModel(BaseModel):
 		words = self.tokenize(text)
 
 		# Create graph
-		cooccurrenceDict = cooccurrence.slidingWindowMatrix(words, 50, self.stripStopWords)
+		cooccurrenceDict = cooccurrence.slidingWindowMatrix(words, 5, self.stripStopWords)
 		G = nx.Graph(cooccurrenceDict)
 
 		# Get keywords by node centrality
