@@ -1,7 +1,6 @@
 from baseline import *
 from parse import handwritten_data_reader, inspec_data_reader, duc_data_reader
 
-
 DATASETS = ['Handwritten', 'Inspec', 'DUC-2001']
 READERS = {
     'Handwritten': handwritten_data_reader,
@@ -9,7 +8,6 @@ READERS = {
     'DUC-2001': duc_data_reader,
 }
 MISTAKES_FILENAME = 'mistakes.txt'
-
 
 def F1(precision, recall):
     if precision + recall == 0:
