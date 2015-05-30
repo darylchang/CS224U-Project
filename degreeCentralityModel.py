@@ -10,11 +10,12 @@ class DegreeCentralityModel(BaseModel):
 		words = self.tokenize(text)
 
 		# Create graph
-		cooccurrenceDict = cooccurrence.slidingWindowMatrix(words, 50, self.stripStopWords)
+		cooccurrenceDict = cooccurrence.slidingWindowMatrix(words, 50, self.synFilter,  self.stripStopWords)
 		G = nx.Graph(cooccurrenceDict)
 
 		# Get keywords by node centrality
 		node_degrees = nx.degree_centrality(G)
 		node_degrees = sorted(node_degrees.items(), key=lambda x:x[1], reverse=True)
 		keywords = [keyword for keyword, degree in node_degrees][:min_num_labels]
+		print keywords
 		return keywords

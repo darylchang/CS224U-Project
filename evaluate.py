@@ -28,7 +28,7 @@ def evaluate_extractor_on_reader(extractor, reader):
     tp, fp, fn = 0., 0., 0.
     mistakes = []
     
-    for filename, text, labels in examples:
+    for filename, text, labels in examples[:20]:
         extracted_labels = extractor(text, len(labels))
         for extracted_label in extracted_labels:
             if extracted_label in labels:
