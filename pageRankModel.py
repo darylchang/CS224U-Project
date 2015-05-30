@@ -17,4 +17,17 @@ class PageRankModel(BaseModel):
 		pagerank_scores = nx.pagerank(G)
 		pagerank_scores = sorted(pagerank_scores.items(), key=lambda x:x[1], reverse=True)
 		keywords = [keyword for keyword, degree in pagerank_scores][:min_num_labels]
-		return keywords
+		
+		# Combine keywords into keyphrases
+		keyphrases, keyphrase = [], []
+		for word in words:
+			word = word if not self.synFilter else word[0]
+			if word in keywords:
+				keyphrase.append(word)
+			else:
+				if keyphrase:
+					keyphrases.append(keyphrase)
+				keyphrase = []
+
+		result = [' '.join(keyphrase) for keyphrase in keyphrases][:min_num_labels]
+		return result

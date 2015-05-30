@@ -6,10 +6,10 @@ class DegreeCentralityModel(BaseModel):
 
 	def extract_keyphrases(self, text, min_num_labels):
 		# Tokenize text
-		words = self.tokenize(text)
+		words = self.tokenize(text) # Note: tuples if using a synFilter
 
 		# Create graph
-		cooccurrenceDict = cooccurrence.slidingWindowMatrix(words, self.windowSize, self.synFilter,  self.stripStopWords)
+		cooccurrenceDict = cooccurrence.slidingWindowMatrix(words, self.windowSize, self.synFilter, self.stripStopWords)
 		G = nx.Graph(cooccurrenceDict)
 
 		# Get keywords by node centrality
@@ -20,6 +20,7 @@ class DegreeCentralityModel(BaseModel):
 		# Combine keywords into keyphrases
 		keyphrases, keyphrase = [], []
 		for word in words:
+			word = word if not self.synFilter else word[0]
 			if word in keywords:
 				keyphrase.append(word)
 			else:

@@ -39,9 +39,6 @@ def evaluate_extractor_on_dataset(extractor, dataset, numExamples):
 
         num_gold_labels = len(gold_labels)
         extracted_labels = extractor(text, num_gold_labels)
-        print extracted_labels
-        print gold_labels
-        print '\n'
         for extracted_label in extracted_labels:
             if extracted_label in gold_labels:
                 tp += 1
