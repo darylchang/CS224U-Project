@@ -1,5 +1,6 @@
 from baseline import *
 from parse import handwritten_data_reader, inspec_data_reader, duc_data_reader
+import sys
 
 DATASETS = [
     'Handwritten',
@@ -23,35 +24,55 @@ def compute_stats(tp, fp, fn):
     recall = 0. if tp + fn == 0 else tp / (tp + fn)
     return (precision, recall, F1(precision, recall))
 
-def evaluate_extractor_on_reader(extractor, reader):
+def evaluate_extractor_on_dataset(extractor, dataset):
+    reader = READERS[dataset]
     examples = reader()
     tp, fp, fn = 0., 0., 0.
     mistakes = []
+
+    num_correct_r_labels, total_gold_labels = 0, 0
     
-    for filename, text, labels in examples[:20]:
-        extracted_labels = extractor(text, len(labels))
+    sys.stdout.write('Evaluating extractor on %s dataset' % (dataset))
+    for filename, text, gold_labels in examples:
+        sys.stdout.write('.')
+        sys.stdout.flush()
+
+        num_gold_labels = len(gold_labels)
+        extracted_labels = extractor(text, num_gold_labels)
         for extracted_label in extracted_labels:
-            if extracted_label in labels:
+            if extracted_label in gold_labels:
                 tp += 1
             else:
                 fp += 1
-        
-        missed_labels = labels.difference(extracted_labels)
+
+        missed_labels = gold_labels.difference(extracted_labels)
         fn += len(missed_labels)
         
-        correct_labels = labels.intersection(extracted_labels)
-        extraneous_labels = set(extracted_labels).difference(labels)
+        correct_labels = gold_labels.intersection(extracted_labels)
+        extraneous_labels = set(extracted_labels).difference(gold_labels)
         mistakes.append((filename, correct_labels, missed_labels, extraneous_labels))
-        
-    return compute_stats(tp, fp, fn), mistakes
+
+        if len(extracted_labels) < num_gold_labels:
+            print '\nWARNING: for document %s, extracted %s keyphrases (suggested: %s)' % (filename, len(extracted_labels), num_gold_labels)
+
+        # Update R-Precision stats
+        total_gold_labels += num_gold_labels
+        num_correct_r_labels += len([
+            label for label in extracted_labels[:num_gold_labels]
+            if label in gold_labels
+        ])
+    
+    print ' Done.'
+    r_precision = float(num_correct_r_labels) / total_gold_labels
+    return r_precision, compute_stats(tp, fp, fn), mistakes
 
 def print_results(results):
-    print '%-14s%-12s%-12s%-12s' % ('Dataset', 'Precision', 'Recall', 'F1')
-    print '-------------------------------------------\n'
+    print '%-14s%-15s%-13s%-13s%-13s' % ('Dataset', 'R-Precision', 'Precision', 'Recall', 'F1')
+    print '\n', '-'*60, '\n'
     for dataset in DATASETS:
-        precision, recall, f1 = results[dataset]
-        print '%-14s%-.3f%-7s%-.3f%-7s%-.3f\n' % (dataset, precision, '', recall, '', f1)
-    print '==========================================='
+        r_precision, precision, recall, f1 = results[dataset]
+        print '%-14s%-.3f%-10s%-.3f%-8s%-.3f%-8s%-.3f\n' % (dataset, r_precision, '', precision, '', recall, '', f1)
+    print '='*60
 
 def output_mistakes(mistakes_list):
     with open(MISTAKES_FILENAME, 'w') as f:
@@ -67,11 +88,15 @@ def evaluate_extractor(extractor):
     results = {}
     mistakes_list = []
     for dataset in DATASETS:
-        reader_results, mistakes = evaluate_extractor_on_reader(extractor, READERS[dataset])
-        results[dataset] = reader_results
+        r_precision, (precision, recall, f1), mistakes = evaluate_extractor_on_dataset(extractor, dataset)
+        results[dataset] = (r_precision, precision, recall, f1)
         mistakes_list += mistakes
     print_results(results)
     output_mistakes(mistakes_list)
 
 if __name__=='__main__':
-    evaluate_extractor(baseline_most_frequent_extractor)
+    from degreeCentralityModel import DegreeCentralityModel
+    from pageRankModel import PageRankModel
+    model = DegreeCentralityModel()
+    model2 = PageRankModel()
+    model2.evaluate()

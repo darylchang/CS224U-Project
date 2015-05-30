@@ -7,11 +7,11 @@ ENCODING = 'utf-8'
 # Contains readers that convert the various data sets into lists of
 # (tokens, keywords) pairs.
 
-def clean_label(label):
+def clean_text(label):
     return ' '.join(label.strip().lower().split())
 
 def get_semicolon_separated_labels(label_text):
-    return set([clean_label(label) for label in label_text.strip().split(';') if label])
+    return set([clean_text(label) for label in label_text.strip().split(';') if label])
 
 def handwritten_data_reader():
     # Simple data format for handwritten document/keyword examples. The first
@@ -24,7 +24,7 @@ def handwritten_data_reader():
     for filename in filenames:
         with open(data_dir + filename, 'r') as f:
             label_line = f.readline().decode(ENCODING)
-            text = f.read().decode(ENCODING)
+            text = clean_text(f.read().decode(ENCODING))
         labels = get_semicolon_separated_labels(label_line)
         examples.append((data_dir + filename, text, labels))
     return examples
@@ -39,7 +39,7 @@ def inspec_data_reader():
     examples = []
     for abstract_file, labels_file in zip(abstracts_filenames, labels_filenames):
         with open(data_dir + abstract_file, 'r') as f:
-            text = f.read().decode(ENCODING)
+            text = clean_text(f.read().decode(ENCODING))
         with open(data_dir + labels_file, 'r') as f:
             label_text = f.read().decode(ENCODING)
         labels = get_semicolon_separated_labels(label_text)
@@ -59,7 +59,7 @@ def process_duc_text(text):
     return text[text.find("<TEXT>") + len("<TEXT>") : text.rfind("</TEXT>")]
 
 def duc_data_reader():
-    data_dir = 'data/DUC2001/'
+    data_dir = 'data/DUC2001/'  
     with open(data_dir + 'documents.txt') as documents_list:
         document_filenames = [filename.strip() for filename in documents_list.readlines()]
     with open(data_dir + 'annotations.txt', 'r') as labels_file:
@@ -70,7 +70,7 @@ def duc_data_reader():
     for document_filename in document_filenames:
         with open(data_dir + document_filename, 'r') as document:
             text = document.read().decode(ENCODING)
-        article_text = process_duc_text(text)
+        article_text = clean_text(process_duc_text(text))
         examples.append((data_dir + document_filename, article_text, labels[document_filename]))
     return examples
 
