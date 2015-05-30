@@ -1,8 +1,8 @@
 import nltk
-from nltk.corpus import wordnet
-from nltk.tokenize import RegexpTokenizer
+
 
 ENCODING = 'utf-8'
+
 
 #################### Parse.py ####################
 # Contains readers that convert the various data sets into lists of

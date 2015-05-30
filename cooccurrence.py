@@ -2,7 +2,6 @@ import matplotlib.pyplot as plt
 import networkx as nx
 import numpy as np 
 from collections import defaultdict
-from parse import tokenize 
 from nltk.corpus import stopwords
 
 ####### Create the adjacency matrix first and then a graph based on it #######
@@ -53,18 +52,18 @@ def rakeMatrix(wordList, delimiters, stripStopWords=True):
 
 def main():
 	fileName = 'data/Handwritten/yeastsamp.txt'
-	fileText = open(fileName).read().decode('utf-8')
-	windowWordArray = tokenize(fileText)
-	cooccurrenceDict = slidingWindowMatrix(windowWordArray, 5)
+	# TODO: update for refactor
+	# fileText = open(fileName).read().decode('utf-8')
+	# windowWordArray = tokenize(fileText)
+	# cooccurrenceDict = slidingWindowMatrix(windowWordArray, 5)
 	# rakeWordArray = tokenize(fileText, stripPunct=False)
 	# stopWords = ['a', 'about', 'an', 'are', 'as','at','be','by','for','from','how','in','is','it','of','on','or','that','the','this','to','was','what','when','where','who','will','with','the']
 	# delimiters = set(['.', ','] + stopWords)
 	# cooccurrenceDict = RakeMatrix(rakeWordArray, delimiters)
-	G = createGraph(cooccurrenceDict)
-	labels = nx.draw_networkx_labels(G)
-	labels = nx.draw_networkx_edge_labels(G)
-	plt.savefig('graph.png')	
+	# G = createGraph(cooccurrenceDict)
+	# labels = nx.draw_networkx_labels(G)
+	# labels = nx.draw_networkx_edge_labels(G)
+	# plt.savefig('graph.png')	
 
 if __name__ == '__main__':
 	main()
-
