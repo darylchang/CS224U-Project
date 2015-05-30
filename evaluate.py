@@ -39,6 +39,7 @@ def approx_match(label, gold_label):
     singularized_gold_label_tokens = [singularize(token) for token in gold_label.split()]
     return contains_sublist(singularized_label_tokens, singularized_gold_label_tokens)
 
+# TODO: Add param for fuzzy/non-fuzzy matching
 def evaluate_extractor_on_dataset(extractor, dataset, numExamples):
     reader = READERS[dataset]
     examples = reader()
