@@ -57,5 +57,5 @@ class BaseModel:
     def extract_keyphrases(self, text, min_num_labels):
         raise NotImplementedError
 
-    def evaluate(self, numExamples=None):
-        evaluate.evaluate_extractor(self.extract_keyphrases, numExamples)
+    def evaluate(self, numExamples=None, verbose=False):
+        evaluate.evaluate_extractor(self.extract_keyphrases, numExamples, verbose)

@@ -74,25 +74,29 @@ def print_results(results):
         print '%-14s%-.3f%-10s%-.3f%-8s%-.3f%-8s%-.3f\n' % (dataset, r_precision, '', precision, '', recall, '', f1)
     print '='*60
 
-def output_mistakes(mistakes_list):
+def output_mistakes(mistakes_list, verbose):
+    outputStr = ''
     with open(MISTAKES_FILENAME, 'w') as f:
         for filename, correct_labels, missed_labels, extraneous_labels in mistakes_list:
-            f.write('='*79 + '\n')
-            f.write('Mistakes for document %s:\n' % (filename))
-            f.write('-'*50 + '\n')
-            f.write('Correct labels: %s\n\n' % (', '.join(correct_labels)))
-            f.write('Missed labels: %s\n\n' % (', '.join(missed_labels)))
-            f.write('Extraneous labels: %s\n' % (', '.join(extraneous_labels)))
+            outputStr += '='*79 + '\n'
+            outputStr += 'Mistakes for document %s:\n' % (filename)
+            outputStr += '-'*50 + '\n'
+            outputStr += 'Correct labels: %s\n\n' % (', '.join(correct_labels))
+            outputStr += 'Missed labels: %s\n\n' % (', '.join(missed_labels))
+            outputStr += 'Extraneous labels: %s\n' % (', '.join(extraneous_labels))
+        f.write(outputStr)
+        if verbose:
+            print outputStr
 
-def evaluate_extractor(extractor, numExamples):
+def evaluate_extractor(extractor, numExamples, verbose=False):
     results = {}
     mistakes_list = []
     for dataset in DATASETS:
         r_precision, (precision, recall, f1), mistakes = evaluate_extractor_on_dataset(extractor, dataset, numExamples)
         results[dataset] = (r_precision, precision, recall, f1)
         mistakes_list += mistakes
+    output_mistakes(mistakes_list, verbose)
     print_results(results)
-    output_mistakes(mistakes_list)
 
 if __name__=='__main__':
     from degreeCentralityModel import DegreeCentralityModel
