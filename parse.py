@@ -1,6 +1,8 @@
 import nltk
 
+
 ENCODING = 'utf-8'
+USE_ALL_INSPEC = False
 
 
 #################### Parse.py ####################
@@ -31,10 +33,18 @@ def handwritten_data_reader():
 
 def inspec_data_reader():
     data_dir = 'data/Inspec/'
-    with open(data_dir + 'test_abstracts.txt', 'r') as abstracts_list:
-        abstracts_filenames = [filename.strip() for filename in abstracts_list.readlines()]
-    with open(data_dir + 'test_labels.txt', 'r') as labels_list:
-        labels_filenames = [filename.strip() for filename in labels_list.readlines()]
+    abstracts_listings = ['test_abstracts.txt']
+    labels_listings = ['test_labels.txt']
+    if USE_ALL_INSPEC:
+        abstracts_listings += ['train_abstracts.txt', 'dev_abstracts.txt']
+        labels_listings += ['train_labels.txt', 'dev_labels.txt']
+    abstracts_filenames, labels_filenames = [], []
+    for abstracts_listing in abstracts_listings:
+        with open(data_dir + abstracts_listing, 'r') as abstracts_list:
+            abstracts_filenames += [filename.strip() for filename in abstracts_list.readlines()]
+    for labels_listing in labels_listings:
+        with open(data_dir + labels_listing, 'r') as labels_list:
+            labels_filenames += [filename.strip() for filename in labels_list.readlines()]
 
     examples = []
     for abstract_file, labels_file in zip(abstracts_filenames, labels_filenames):
