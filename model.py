@@ -2,14 +2,14 @@ import evaluate
 from nltk.corpus import wordnet
 from nltk.tokenize import RegexpTokenizer
 
-
 class BaseModel:
 
-    def __init__(self, stripPunct=True, stemRule=None, lemmatize=False, stripStopWords=True):
+    def __init__(self, stripPunct=True, stemRule=None, lemmatize=False, stripStopWords=True, synFilter=None):
         self.stripPunct = stripPunct
         self.stemRule = stemRule
         self.lemmatize = lemmatize
         self.stripStopWords = stripStopWords
+        self.synFilter = synFilter
 
     def tokenize(self, text):
         # Strip punctuation if unneeded for co-occurrence counts
@@ -27,6 +27,10 @@ class BaseModel:
             stemmer = nltk.PorterStemmer() if self.stemRule=='Porter' else nltk.LancasterStemmer()
             words = [stemmer.stem(w) for w in words]
 
+        # Part of speech tagging
+        if self.lemmatize or self.synFilter:
+        	self.taggedWords = nltk.pos_tag(words)
+
         # Lemmatization
         if self.lemmatize:
             lemmatizer = nltk.WordNetLemmatizer()
@@ -35,8 +39,8 @@ class BaseModel:
 
         return words
 
-    # Maps from NLTK POS tags to WordNet POS tagsC
-    def wordnetPosCode(tag):
+    # Maps from NLTK POS tags to WordNet POS tags
+    def wordnetPosCode(self, tag):
         if tag.startswith('NN'):
             return wordnet.NOUN
         elif tag.startswith('VB'):

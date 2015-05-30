@@ -50,20 +50,19 @@ def rakeMatrix(wordList, delimiters, stripStopWords=True):
 						cooccurrenceDict[wordOne][wordTwo] += 1
 	return cooccurrenceDict
 
-def main():
-	fileName = 'data/Handwritten/yeastsamp.txt'
-	# TODO: update for refactor
-	# fileText = open(fileName).read().decode('utf-8')
-	# windowWordArray = tokenize(fileText)
-	# cooccurrenceDict = slidingWindowMatrix(windowWordArray, 5)
-	# rakeWordArray = tokenize(fileText, stripPunct=False)
-	# stopWords = ['a', 'about', 'an', 'are', 'as','at','be','by','for','from','how','in','is','it','of','on','or','that','the','this','to','was','what','when','where','who','will','with','the']
-	# delimiters = set(['.', ','] + stopWords)
-	# cooccurrenceDict = RakeMatrix(rakeWordArray, delimiters)
-	# G = createGraph(cooccurrenceDict)
-	# labels = nx.draw_networkx_labels(G)
-	# labels = nx.draw_networkx_edge_labels(G)
-	# plt.savefig('graph.png')	
+# def main():
+# 	fileName = 'data/Handwritten/yeastsamp.txt'
+# 	fileText = open(fileName).read().decode('utf-8')
+# 	windowWordArray = tokenize(fileText)
+# 	cooccurrenceDict = slidingWindowMatrix(windowWordArray, 5)
+# 	# rakeWordArray = tokenize(fileText, stripPunct=False)
+# 	# stopWords = ['a', 'about', 'an', 'are', 'as','at','be','by','for','from','how','in','is','it','of','on','or','that','the','this','to','was','what','when','where','who','will','with','the']
+# 	# delimiters = set(['.', ','] + stopWords)
+# 	# cooccurrenceDict = RakeMatrix(rakeWordArray, delimiters)
+# 	G = createGraph(cooccurrenceDict)
+# 	labels = nx.draw_networkx_labels(G)
+# 	labels = nx.draw_networkx_edge_labels(G)
+# 	plt.savefig('graph.png')	
 
 if __name__ == '__main__':
 	main()

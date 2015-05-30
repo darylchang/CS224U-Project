@@ -1,6 +1,5 @@
 import nltk
 
-
 ENCODING = 'utf-8'
 
 

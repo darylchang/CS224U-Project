@@ -1,5 +1,5 @@
 import networkx
-from model import *
+from degreeCentralityModel import DegreeCentralityModel
 
 model = DegreeCentralityModel()
 model.evaluate()
