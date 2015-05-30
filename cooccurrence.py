@@ -2,7 +2,6 @@ import matplotlib.pyplot as plt
 import networkx as nx
 import numpy as np 
 from collections import defaultdict
-from parse import tokenize 
 from nltk.corpus import stopwords
 
 ####### Create the adjacency matrix first and then a graph based on it #######
@@ -67,4 +66,3 @@ def rakeMatrix(wordList, delimiters, stripStopWords=True):
 
 if __name__ == '__main__':
 	main()
-

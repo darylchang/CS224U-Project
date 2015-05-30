@@ -1,7 +1,11 @@
 from baseline import *
 from parse import handwritten_data_reader, inspec_data_reader, duc_data_reader
 
-DATASETS = ['Handwritten', 'Inspec', 'DUC-2001']
+DATASETS = [
+    'Handwritten',
+    'Inspec',
+    'DUC-2001',
+]
 READERS = {
     'Handwritten': handwritten_data_reader,
     'Inspec': inspec_data_reader,
@@ -25,7 +29,7 @@ def evaluate_extractor_on_reader(extractor, reader):
     mistakes = []
     
     for filename, text, labels in examples:
-        extracted_labels = extractor.extract_keywords(text)
+        extracted_labels = extractor(text, len(labels))
         for extracted_label in extracted_labels:
             if extracted_label in labels:
                 tp += 1
