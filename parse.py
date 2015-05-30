@@ -1,6 +1,4 @@
 import nltk
-from nltk.corpus import wordnet
-from nltk.tokenize import RegexpTokenizer
 
 ENCODING = 'utf-8'
 

@@ -2,6 +2,8 @@ import networkx as nx
 import cooccurrence
 import evaluate
 from parse import tokenize
+from nltk.corpus import wordnet
+from nltk.tokenize import RegexpTokenizer
 
 class BaseModel:
 
@@ -35,7 +37,7 @@ class BaseModel:
     return words
 
     # Maps from NLTK POS tags to WordNet POS tagsC
-	def wordnetPosCode(tag):
+	def wordnetPosCode(self, tag):
 	    if tag.startswith('NN'):
 	        return wordnet.NOUN
 	    elif tag.startswith('VB'):
@@ -46,3 +48,4 @@ class BaseModel:
 	        return wordnet.ADV
 	    else:
 	        return wordnet.NOUN
+

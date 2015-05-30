@@ -1,14 +1,11 @@
+import cooccurrence
 from model import BaseModel
 
 class DegreeCentralityModel(BaseModel):
 
-	def __init__(self):
-		self.stripStopWords=True
-		self.lemmatize=False
-
 	def extract_keywords(self, text):
 		# Tokenize text
-		tokenize(text, lemmatize=self.lemmatize)
+		self.tokenize(text, lemmatize=self.lemmatize)
 
 		# Create graph
 		cooccurrenceDict = cooccurrence.slidingWindowMatrix(words, 50, self.stripStopWords)
