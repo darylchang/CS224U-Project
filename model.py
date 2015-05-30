@@ -5,12 +5,14 @@ import nltk
 
 class BaseModel:
 
-    def __init__(self, stripPunct=True, stemRule=None, lemmatize=False, stripStopWords=True, synFilter=None):
+    def __init__(self, stripPunct=True, stemRule=None, lemmatize=False, 
+    			 stripStopWords=True, synFilter=None, windowSize=None):
         self.stripPunct = stripPunct
         self.stemRule = stemRule
         self.lemmatize = lemmatize
         self.stripStopWords = stripStopWords
         self.synFilter = synFilter
+        self.windowSize = windowSize
 
     def tokenize(self, text):
         # Strip punctuation if unneeded for co-occurrence counts
@@ -52,8 +54,8 @@ class BaseModel:
         else:
             return wordnet.NOUN
 
-    def extract_keywords(self, text, min_num_labels):
+    def extract_keyphrases(self, text, min_num_labels):
         raise NotImplementedError
 
     def evaluate(self, numExamples=None):
-        evaluate.evaluate_extractor(self.extract_keywords, numExamples)
+        evaluate.evaluate_extractor(self.extract_keyphrases, numExamples)

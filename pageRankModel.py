@@ -5,12 +5,12 @@ from model import BaseModel
 
 class PageRankModel(BaseModel):
 
-	def extract_keywords(self, text, min_num_labels):
+	def extract_keyphrases(self, text, min_num_labels):
 		# Tokenize text
 		words = self.tokenize(text)
 
 		# Create graph
-		cooccurrenceDict = cooccurrence.slidingWindowMatrix(words, 5, self.synFilter, self.stripStopWords)
+		cooccurrenceDict = cooccurrence.slidingWindowMatrix(words, self.windowSize, self.synFilter, self.stripStopWords)
 		G = nx.Graph(cooccurrenceDict)
 
 		# Get keywords by PageRank score
