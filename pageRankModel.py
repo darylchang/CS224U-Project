@@ -10,7 +10,7 @@ class PageRankModel(BaseModel):
 		words = self.tokenize(text)
 
 		# Create graph
-		cooccurrenceDict = cooccurrence.slidingWindowMatrix(words, 5, self.stripStopWords)
+		cooccurrenceDict = cooccurrence.slidingWindowMatrix(words, 10, self.stripStopWords)
 		G = nx.Graph(cooccurrenceDict)
 
 		# Get keywords by PageRank score
