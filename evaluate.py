@@ -39,7 +39,7 @@ def approx_match(label, gold_label):
     singularized_gold_label_tokens = [singularize(token) for token in gold_label.split()]
     return contains_sublist(singularized_label_tokens, singularized_gold_label_tokens)
 
-def evaluate_extractor_on_dataset(extractor, dataset):
+def evaluate_extractor_on_dataset(extractor, dataset, numExamples):
     reader = READERS[dataset]
     examples = reader()
     tp, fp, fn = 0., 0., 0.
@@ -48,7 +48,7 @@ def evaluate_extractor_on_dataset(extractor, dataset):
     num_correct_r_labels, num_approx_correct_r_labels, total_gold_labels = 0, 0, 0
     
     sys.stdout.write('Evaluating extractor on %s dataset' % (dataset))
-    for filename, text, gold_labels in examples:
+    for filename, text, gold_labels in examples[:numExamples]:
         sys.stdout.write('.')
         sys.stdout.flush()
 
@@ -81,7 +81,7 @@ def evaluate_extractor_on_dataset(extractor, dataset):
             if any([approx_match(label, gold_label) for gold_label in gold_labels])
         ])
 
-        DEBUG_APPROX_MATCHING = True
+        DEBUG_APPROX_MATCHING = False
         if DEBUG_APPROX_MATCHING:
             approx_only_matches = [
                 label for label in extracted_labels[:num_gold_labels]
@@ -90,20 +90,19 @@ def evaluate_extractor_on_dataset(extractor, dataset):
             if approx_only_matches:
                 print '\nFound approximate matches %s for gold labels %s\n' % (approx_only_matches, gold_labels)
 
-    
     print ' Done.'
     r_precision = float(num_correct_r_labels) / total_gold_labels
     r_precision_approx = float(num_approx_correct_r_labels) / total_gold_labels
-    return r_precision, compute_stats(tp, fp, fn), mistakes
+    return r_precision_approx, r_precision, compute_stats(tp, fp, fn), mistakes
 
 def print_results(results):
     print '\n%-16s%-13s%-13s%-13s%-13s%-13s' % ('Dataset', 'R-P app.', 'R-P ex.', 'Precision', 'Recall', 'F1')
     print '-'*73, '\n'
     for dataset in DATASETS:
-        r_precision, precision, recall, f1 = results[dataset]
+        r_precision_approx, r_precision, precision, recall, f1 = results[dataset]
         print '%-16s%-.3f%-8s%-.3f%-8s%-.3f%-8s%-.3f%-8s%-.3f\n' % (
             dataset,
-            r_precision, '',
+            r_precision_approx, '',
             r_precision, '',
             precision, '',
             recall, '',
@@ -111,25 +110,29 @@ def print_results(results):
         )
     print '='*73
 
-def output_mistakes(mistakes_list):
+def output_mistakes(mistakes_list, verbose):
+    outputStr = ''
     with open(MISTAKES_FILENAME, 'w') as f:
         for filename, correct_labels, missed_labels, extraneous_labels in mistakes_list:
-            f.write('='*79 + '\n')
-            f.write('Mistakes for document %s:\n' % (filename))
-            f.write('-'*50 + '\n')
-            f.write('Correct labels: %s\n\n' % (', '.join(correct_labels)))
-            f.write('Missed labels: %s\n\n' % (', '.join(missed_labels)))
-            f.write('Extraneous labels: %s\n' % (', '.join(extraneous_labels)))
+            outputStr += '='*79 + '\n'
+            outputStr += 'Mistakes for document %s:\n' % (filename)
+            outputStr += '-'*50 + '\n'
+            outputStr += 'Correct labels: %s\n\n' % (', '.join(correct_labels))
+            outputStr += 'Missed labels: %s\n\n' % (', '.join(missed_labels))
+            outputStr += 'Extraneous labels: %s\n' % (', '.join(extraneous_labels))
+        f.write(outputStr)
+        if verbose:
+            print outputStr
 
-def evaluate_extractor(extractor):
+def evaluate_extractor(extractor, numExamples, verbose=False):
     results = {}
     mistakes_list = []
     for dataset in DATASETS:
-        r_precision, (precision, recall, f1), mistakes = evaluate_extractor_on_dataset(extractor, dataset)
-        results[dataset] = (r_precision, precision, recall, f1)
+        r_precision_approx, r_precision, (precision, recall, f1), mistakes = evaluate_extractor_on_dataset(extractor, dataset, numExamples)
+        results[dataset] = (r_precision_approx, r_precision, precision, recall, f1)
         mistakes_list += mistakes
+    output_mistakes(mistakes_list, verbose)
     print_results(results)
-    output_mistakes(mistakes_list)
 
 if __name__=='__main__':
     from degreeCentralityModel import DegreeCentralityModel

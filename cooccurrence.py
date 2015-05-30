@@ -5,49 +5,50 @@ from collections import defaultdict
 from nltk.corpus import stopwords
 
 ####### Create the adjacency matrix first and then a graph based on it #######
-#cooccurence by N sized sliding window
-#then weight with PMI, or TFIDF 
-#RAKE, use delimitors to split the text upon stop word set. Coccurence 
-#between word (A,B) is if they occur in the chunks together. 
-stop = stopwords.words('english')
+# cooccurence by N sized sliding window
+# then weight with PMI, or TFIDF 
+# RAKE, use delimitors to split the text upon stop word set. Coccurence 
+# between word (A,B) is if they occur in the chunks together. 
+STOP = stopwords.words('english')
 
-def slidingWindowMatrix(wordList, N, stripStopWords=True):
-	numWords = len(wordList)
-	vocab = list(set(wordList))
-	vocabSize = len(vocab)
+def findNgrams(inputList, n):
+  return zip(*[inputList[i:] for i in range(n)])
+
+def slidingWindowMatrix(words, N, synFilter, stripStopWords=True):	
 	cooccurrenceDict = defaultdict(lambda: defaultdict(int))
-	for idx, val in enumerate(wordList):
-		beg = idx
-		end = beg + N - 1
-		if(end>numWords - 1):
-			break
-		window = list(set(wordList[beg:end+1]))
-		for wordOne in window:
-			for wordTwo in window:
+	nGrams = findNgrams(words, N)
+	for nGram in nGrams:
+		nGram = nGram if not synFilter else [word for word,tag in nGram if tag in synFilter]
+		for wordOne in nGram:
+			for wordTwo in nGram:
 				if not stripStopWords:
 					cooccurrenceDict[wordOne][wordTwo] += 1
-				elif stripStopWords and wordOne not in stop and wordTwo not in stop:
+				elif stripStopWords and wordOne not in STOP and wordTwo not in STOP:
 					cooccurrenceDict[wordOne][wordTwo] += 1
 	return cooccurrenceDict
 
-def rakeMatrix(wordList, delimiters, stripStopWords=True):
-	fragments = []
-	beg = 0
-	for idx, val in enumerate(wordList):
-		if wordList[idx] in delimiters:
-			frag = wordList[beg:idx]
+def rakeMatrix(words, delimiters, synFilter, stripStopWords=True):
+	# Create fragments
+	fragments, frag = []
+	for word in words:
+		if word in delimiters:
 			fragments.append(frag)
-			beg = idx+1
+			frag = []
+		else:
+			frag.append(word)
+	if frag:
+		fragments.append(frag)
+
+	# TODO: Explore using set() for word occcurrences in window definition
 	cooccurrenceDict = defaultdict(lambda: defaultdict(int))
-	for frag in fragments:
-		if len(frag) > 0:
-			window = list(set(frag))
-			for wordOne in window:
-				for wordTwo in window:
-					if not stripStopWords:
-						cooccurrenceDict[wordOne][wordTwo] += 1
-					elif stripStopWords and wordOne not in stop and wordTwo not in stop:
-						cooccurrenceDict[wordOne][wordTwo] += 1
+	for frag in fragments: 
+		frag = frag if not synFilter else [word for word,tag in frag if tag in synFilter]
+		for wordOne in frag:
+			for wordTwo in frag:
+				if not stripStopWords:
+					cooccurrenceDict[wordOne][wordTwo] += 1
+				elif stripStopWords and wordOne not in STOP and wordTwo not in STOP:
+					cooccurrenceDict[wordOne][wordTwo] += 1
 	return cooccurrenceDict
 
 # def main():

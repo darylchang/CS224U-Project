@@ -1,15 +1,18 @@
 import evaluate
 from nltk.corpus import wordnet
 from nltk.tokenize import RegexpTokenizer
+import nltk
 
 class BaseModel:
 
-    def __init__(self, stripPunct=True, stemRule=None, lemmatize=False, stripStopWords=True, synFilter=None):
+    def __init__(self, stripPunct=True, stemRule=None, lemmatize=False, 
+    			 stripStopWords=True, synFilter=None, windowSize=None):
         self.stripPunct = stripPunct
         self.stemRule = stemRule
         self.lemmatize = lemmatize
         self.stripStopWords = stripStopWords
         self.synFilter = synFilter
+        self.windowSize = windowSize
 
     def tokenize(self, text):
         # Strip punctuation if unneeded for co-occurrence counts
@@ -27,17 +30,16 @@ class BaseModel:
             stemmer = nltk.PorterStemmer() if self.stemRule=='Porter' else nltk.LancasterStemmer()
             words = [stemmer.stem(w) for w in words]
 
-        # Part of speech tagging
+        # POS tagging
         if self.lemmatize or self.synFilter:
-        	self.taggedWords = nltk.pos_tag(words)
+            taggedWords = [(word, self.wordnetPosCode(tag)) for word, tag in nltk.pos_tag(words)]
 
-        # Lemmatization
+        # Lemmatize
         if self.lemmatize:
-            lemmatizer = nltk.WordNetLemmatizer()
-            taggedWords = nltk.pos_tag(words)
-            words = [lemmatizer.lemmatize(word, self.wordnetPosCode(tag)) for word, tag in taggedWords]
+        	lemmatizer = nltk.WordNetLemmatizer()
+        	words = [lemmatizer.lemmatize(word, tag) for word, tag in taggedWords]
 
-        return words
+        return taggedWords if self.synFilter else words
 
     # Maps from NLTK POS tags to WordNet POS tags
     def wordnetPosCode(self, tag):
@@ -52,8 +54,8 @@ class BaseModel:
         else:
             return wordnet.NOUN
 
-    def extract_keywords(self, text, min_num_labels):
+    def extract_keyphrases(self, text, min_num_labels):
         raise NotImplementedError
 
-    def evaluate(self):
-        evaluate.evaluate_extractor(self.extract_keywords)
+    def evaluate(self, numExamples=None, verbose=False):
+        evaluate.evaluate_extractor(self.extract_keyphrases, numExamples, verbose)
