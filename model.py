@@ -60,4 +60,4 @@ class BaseModel:
         raise NotImplementedError
 
     def evaluate(self, numExamples=None, verbose=False, skip_datasets=[]):
-        return evaluate.evaluate_extractor(self.extract_keyphrases, numExamples, verbose)
+        return evaluate.evaluate_extractor(self.extract_keyphrases, numExamples, verbose, skip_datasets)

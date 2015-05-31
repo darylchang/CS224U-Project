@@ -10,6 +10,6 @@ from gridSearch import gridSearch
 # model.evaluate(numExamples=10, verbose=True)
 
 options = dict()
-options['windowSize']=range(4, 31, 2)
-options['keywordThreshold']=range(2, 10, 2)
+options['windowSize']=range(24, 33, 2)
+options['keywordThreshold']=[3, 4, 5]
 gridSearch(PageRankModel, options, numExamples=3, verbose=True)

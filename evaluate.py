@@ -112,10 +112,10 @@ def evaluate_extractor_on_dataset(extractor, dataset, numExamples, verbose):
     r_precision_approx = float(num_approx_correct_r_labels) / total_gold_labels
     return r_precision_approx, r_precision, compute_stats(tp, fp, fn), mistakes
 
-def print_results(results):
+def print_results(results, skip_datasets):
     print '\n%-16s%-13s%-13s%-13s%-13s%-13s' % ('Dataset', 'R-P app.', 'R-P ex.', 'Precision', 'Recall', 'F1')
     print '-'*73, '\n'
-    for dataset in DATASETS:
+    for dataset in DATASETS.difference(skip_datasets):
         r_precision_approx, r_precision, precision, recall, f1 = results[dataset]
         print '%-16s%-.3f%-8s%-.3f%-8s%-.3f%-8s%-.3f%-8s%-.3f\n' % (
             dataset,
@@ -160,7 +160,7 @@ def evaluate_extractor(extractor, numExamples, verbose=False, skip_datasets=[]):
         mistakes_list += mistakes
     if verbose:
         output_mistakes(mistakes_list)
-    print_results(results)
+    print_results(results, skip_datasets)
     return results
 
 if __name__=='__main__':
