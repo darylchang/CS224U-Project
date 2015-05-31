@@ -6,10 +6,10 @@ import nltk
 from gridSearch import gridSearch
 
 # model = DegreeCentralityModel(windowSize=10, synFilter=[wordnet.NOUN, wordnet.ADJ], 
-# 							  keywordThreshold=5)
-# model.evaluate(numExamples=10, verbose=False)
+							  # keywordThreshold=5)
+# model.evaluate(numExamples=10, verbose=True)
 
 options = dict()
-options['windowSize']=[4,5,6,7]
-options['keywordThreshold']=[2,3,4]
-gridSearch(PageRankModel, options, numExamples=10, verbose=True)
+options['windowSize']=range(4, 31, 2)
+options['keywordThreshold']=range(2, 10, 2)
+gridSearch(PageRankModel, options, numExamples=3, verbose=True)

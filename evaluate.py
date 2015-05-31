@@ -3,11 +3,11 @@ from parse import handwritten_data_reader, inspec_data_reader, duc_data_reader
 from pattern.en import singularize
 import sys
 
-DATASETS = [
+DATASETS = set([
     'Handwritten',
     'Inspec',
     'DUC-2001',
-]
+])
 READERS = {
     'Handwritten': handwritten_data_reader,
     'Inspec': inspec_data_reader,
@@ -46,7 +46,7 @@ def approx_match(label, gold_label, use_includes=False):
     else:
         return singularized_label_tokens == singularized_gold_label_tokens
 
-def evaluate_extractor_on_dataset(extractor, dataset, numExamples):
+def evaluate_extractor_on_dataset(extractor, dataset, numExamples, verbose):
     reader = READERS[dataset]
     examples = reader()
     tp, fp, fn = 0., 0., 0.
@@ -74,29 +74,39 @@ def evaluate_extractor_on_dataset(extractor, dataset, numExamples):
         fn += len(missed_exact_labels)
 
         # Update R-Precision stats
+        # Note that the precision is the percentage of gold keyphrases that
+        # match an extracted keyphrase. If done the other way around, a system
+        # could score artificially high by having slight variants of a single
+        # gold keyphrase. But since the gold keyphrases are, by definition,
+        # distinct from each other, we don't worry about multiple gold
+        # keyphrases matching a single candidate keyphrase.
         total_gold_labels += num_gold_labels
         first_r_labels = set(extracted_labels[:num_gold_labels])
         num_correct_r_labels += len([
-            label for label in first_r_labels
-            if label in gold_labels
-        ])
-        approx_labels = set([
-            label for label in first_r_labels
-            if any([approx_match(label, gold_label) for gold_label in gold_labels])
-        ])
-        num_approx_correct_r_labels += len(approx_labels)
-
-        # Update mistakes file
-        correct_labels = gold_labels.intersection(first_r_labels)
-        approx_only_matches = approx_labels.difference(correct_labels)
-        missed_labels = [
             gold_label for gold_label in gold_labels
-            if not any([approx_match(label, gold_label) for label in first_r_labels])
-        ]
-        extraneous_labels = first_r_labels.difference(correct_labels).difference(approx_only_matches)
-        extra_labels = extracted_labels[num_gold_labels:]
+            if gold_label in first_r_labels
+        ])
+        num_approx_correct_r_labels += len([
+            gold_label for gold_label in gold_labels
+            if any([approx_match(label, gold_label) for label in first_r_labels])
+        ])
 
-        mistakes.append((filename, gold_labels, correct_labels, approx_only_matches, missed_labels, extraneous_labels, extra_labels))
+        if verbose:
+            # Update mistakes file
+            approx_labels = set([
+                label for label in first_r_labels
+                if any([approx_match(label, gold_label) for gold_label in gold_labels])
+            ])
+            correct_labels = gold_labels.intersection(first_r_labels)
+            approx_only_matches = approx_labels.difference(correct_labels)
+            missed_labels = [
+                gold_label for gold_label in gold_labels
+                if not any([approx_match(label, gold_label) for label in first_r_labels])
+            ]
+            extraneous_labels = first_r_labels.difference(correct_labels).difference(approx_only_matches)
+            extra_labels = extracted_labels[num_gold_labels:]
+
+            mistakes.append((filename, gold_labels, correct_labels, approx_only_matches, missed_labels, extraneous_labels, extra_labels))
 
     print ' Done.'
     r_precision = float(num_correct_r_labels) / total_gold_labels
@@ -118,7 +128,7 @@ def print_results(results):
         )
     print '='*73
 
-def output_mistakes(mistakes_list, verbose):
+def output_mistakes(mistakes_list):
     outputStr = ''
     with open(MISTAKES_FILENAME, 'w') as f:
         for filename, gold_labels, correct_labels, approx_labels, missed_labels, extraneous_labels, extra_labels in mistakes_list:
@@ -132,17 +142,25 @@ def output_mistakes(mistakes_list, verbose):
             outputStr += 'Extra labels ----> %s\n' % (', '.join(extra_labels))
             outputStr += '='*79 + '\n'
         f.write(outputStr.encode('utf-8'))
-        if verbose:
-            print outputStr
+        # if verbose:
+            # TODO (Daryl): Is printing to the terminal, in addition to writing
+            #               to a file, a necessity? If so, and if we need it to
+            #               be toggleable, the verbose keyword needs to have
+            #               multiple levels, or another keyword argument needs
+            #               to be added. I (Keith) now use the verbose flag to
+            #               speed up grid search by not computing mistakes for
+            #               every set of model parameters.
+            # print outputStr
 
-def evaluate_extractor(extractor, numExamples, verbose=False):
+def evaluate_extractor(extractor, numExamples, verbose=False, skip_datasets=[]):
     results = {}
     mistakes_list = []
-    for dataset in DATASETS:
-        r_precision_approx, r_precision, (precision, recall, f1), mistakes = evaluate_extractor_on_dataset(extractor, dataset, numExamples)
+    for dataset in DATASETS.difference(skip_datasets):
+        r_precision_approx, r_precision, (precision, recall, f1), mistakes = evaluate_extractor_on_dataset(extractor, dataset, numExamples, verbose)
         results[dataset] = (r_precision_approx, r_precision, precision, recall, f1)
         mistakes_list += mistakes
-    output_mistakes(mistakes_list, verbose)
+    if verbose:
+        output_mistakes(mistakes_list)
     print_results(results)
     return results
 
