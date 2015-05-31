@@ -20,7 +20,9 @@ class DegreeCentralityModel(BaseModel):
 		keyphrases = [(keyword,) for keyword in keywords]
 		scores = {(keyword,): (1, node_degrees[keyword]) for keyword in keywords}
 
-		# TODO: Look into interleaving nouns/adjs with adverbs and adjectives
+		# TODO: Look into interleaving nouns/adjs with adverbs and other POS (Daryl)
+		# TODO: Don't combine over punctuation marks (Keith)
+		# TODO: Post-processing; truncate keyphrases at 4 tokens (Daryl)
 		# Combine keywords into keyphrases
 		keyphrase = ()
 		for word in words:

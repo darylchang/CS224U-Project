@@ -15,6 +15,8 @@ READERS = {
 }
 MISTAKES_FILENAME = 'mistakes.txt'
 
+# TODO: Look into using R-precision both token-wise and keyphrase-wise (partial matching, Daryl)
+
 def F1(precision, recall):
     if precision + recall == 0:
         return 0.0

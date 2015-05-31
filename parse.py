@@ -9,6 +9,7 @@ USE_ALL_INSPEC = False
 # Contains readers that convert the various data sets into lists of
 # (tokens, keywords) pairs.
 
+# TODO: Don't break on newlines, tabs, and other escape characters (Keith)
 def clean_text(label):
     return ' '.join(label.strip().lower().split())
 

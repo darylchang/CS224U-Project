@@ -13,7 +13,7 @@ def gridSearch(constructor, options, numExamples, verbose=False):
 		print "Parameters: {}".format(paramCombo)
 		model = constructor(**paramCombo)
 		results = model.evaluate(numExamples, verbose)
-		score = gmean([results[dataset][1] for dataset in DATASETS])
+		score = gmean([results[dataset][0] for dataset in DATASETS])
 		if score > bestScore:
 			bestScore, bestCombo = score, paramCombo
 		print "Score: {}\n\n\n".format(score)
