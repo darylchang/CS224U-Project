@@ -35,5 +35,5 @@ class DegreeCentralityModel(BaseModel):
 				keyphrase = ()
 
 		keyphrases = sorted(set(keyphrases), key=lambda k: scores[k], reverse=True)
-		result = [' '.join(keyphrase) for keyphrase in keyphrases][:min_num_labels]
+		result = [' '.join(keyphrase) for keyphrase in keyphrases][:min_num_labels+5]
 		return result
