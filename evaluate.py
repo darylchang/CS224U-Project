@@ -115,7 +115,6 @@ def output_mistakes(mistakes_list, verbose):
     outputStr = ''
     with open(MISTAKES_FILENAME, 'w') as f:
         for filename, gold_labels, correct_labels, approx_labels, missed_labels, extraneous_labels, extra_labels in mistakes_list:
-            outputStr += '='*79 + '\n'
             outputStr += 'Mistakes for document %s:\n' % (filename)
             outputStr += '-'*50 + '\n'
             outputStr += 'Gold labels -----> %s\n\n' % (', '.join(gold_labels))
@@ -124,6 +123,7 @@ def output_mistakes(mistakes_list, verbose):
             outputStr += 'Extraneous labels ----> %s\n\n' % (', '.join(extraneous_labels))
             outputStr += 'Missed labels ----> %s\n\n' % (', '.join(missed_labels))
             outputStr += 'Extra labels ----> %s\n' % (', '.join(extra_labels))
+            outputStr += '='*79 + '\n'
         f.write(outputStr.encode('utf-8'))
         if verbose:
             print outputStr
