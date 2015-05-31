@@ -17,7 +17,6 @@ MISTAKES_FILENAME = 'mistakes.txt'
 
 # TODO: Look into using R-precision both token-wise and keyphrase-wise (partial matching, Daryl)
 # TODO: Give some indication of optimal performance, i.e., if matched all gold keyphrases in text (Keith)
-# TODO: Rewrite evaluation so gold labels are counted against extracted, instead of other way around (Keith)
 
 def F1(precision, recall):
     if precision + recall == 0:
