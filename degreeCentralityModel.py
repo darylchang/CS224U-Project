@@ -15,7 +15,7 @@ class DegreeCentralityModel(BaseModel):
 
 		# Get keywords by node centrality
 		node_degrees = nx.degree_centrality(G)
-		sorted_node_degrees = sorted(node_degrees.items(), key=lambda x:x[1], reverse=True)[:5*min_num_labels]
+		sorted_node_degrees = sorted(node_degrees.items(), key=lambda x:x[1], reverse=True)[:self.keywordThreshold*min_num_labels]
 		keywords = [keyword for keyword, degree in sorted_node_degrees]
 		keyphrases = [(keyword,) for keyword in keywords]
 		scores = {(keyword,): (1, node_degrees[keyword]) for keyword in keywords}

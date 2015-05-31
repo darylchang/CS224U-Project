@@ -6,18 +6,20 @@ import nltk
 class BaseModel:
 
     def __init__(self, stripPunct=True, stemRule=None, lemmatize=False, 
-    			 stripStopWords=True, synFilter=None, windowSize=None):
+    			 stripStopWords=True, synFilter=None, windowSize=None,
+                 keywordThreshold=5):
         self.stripPunct = stripPunct
         self.stemRule = stemRule
         self.lemmatize = lemmatize
         self.stripStopWords = stripStopWords
         self.synFilter = synFilter
         self.windowSize = windowSize
+        self.keywordThreshold = keywordThreshold
 
     def tokenize(self, text):
         # Strip punctuation if unneeded for co-occurrence counts
         if self.stripPunct:
-            tokenizer = RegexpTokenizer(r'\w+') # TODO: Account for hypenated words
+            tokenizer = RegexpTokenizer(r'[\w\-]+')
             tokens = tokenizer.tokenize(text)
         else:
             tokens = [word for sent in nltk.sent_tokenize(text) for word in nltk.word_tokenize(sent)]
