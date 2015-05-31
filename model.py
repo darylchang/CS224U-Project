@@ -98,7 +98,7 @@ class BaseModel:
                 if keyphrase and ' '.join(keyphrase) in text:
                     score = np.sum([scores[keyword] for keyword in keyphrase])
                     if self.lengthPenaltyFn:
-                        print 'Length penalty: %s being reducted from %s for length of %s' % (self.lengthPenaltyFn(len(keyphrase)), score, len(keyphrase))
+                        # print 'Length penalty: %s being reducted from %s for length of %s' % (self.lengthPenaltyFn(len(keyphrase)), score, len(keyphrase))
                         score -= self.lengthPenaltyFn(len(keyphrase))
                     # TODO (all): once length penalty function is good, sort
                     #             purely by score instead of length.
