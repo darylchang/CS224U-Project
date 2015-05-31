@@ -39,7 +39,6 @@ def approx_match(label, gold_label):
     singularized_gold_label_tokens = [singularize(token) for token in gold_label.split()]
     return contains_sublist(singularized_label_tokens, singularized_gold_label_tokens)
 
-# TODO: Add param for fuzzy/non-fuzzy matching
 def evaluate_extractor_on_dataset(extractor, dataset, numExamples):
     reader = READERS[dataset]
     examples = reader()
@@ -55,41 +54,42 @@ def evaluate_extractor_on_dataset(extractor, dataset, numExamples):
 
         num_gold_labels = len(gold_labels)
         extracted_labels = extractor(text, num_gold_labels)
+        if len(extracted_labels) < num_gold_labels:
+            print '\nWARNING: for document %s, extracted %s keyphrases (suggested: %s)' % (filename, len(extracted_labels), num_gold_labels)
+
         for extracted_label in extracted_labels:
             if extracted_label in gold_labels:
                 tp += 1
             else:
                 fp += 1
 
-        missed_labels = gold_labels.difference(extracted_labels)
-        fn += len(missed_labels)
-        
-        correct_labels = gold_labels.intersection(extracted_labels)
-        extraneous_labels = set(extracted_labels).difference(gold_labels)
-        mistakes.append((filename, correct_labels, missed_labels, extraneous_labels))
-
-        if len(extracted_labels) < num_gold_labels:
-            print '\nWARNING: for document %s, extracted %s keyphrases (suggested: %s)' % (filename, len(extracted_labels), num_gold_labels)
+        missed_exact_labels = gold_labels.difference(extracted_labels)
+        fn += len(missed_exact_labels)
 
         # Update R-Precision stats
         total_gold_labels += num_gold_labels
+        first_r_labels = set(extracted_labels[:num_gold_labels])
         num_correct_r_labels += len([
-            label for label in extracted_labels[:num_gold_labels]
+            label for label in first_r_labels
             if label in gold_labels
         ])
-        num_approx_correct_r_labels += len([
-            label for label in extracted_labels[:num_gold_labels]
+        approx_labels = set([
+            label for label in first_r_labels
             if any([approx_match(label, gold_label) for gold_label in gold_labels])
         ])
+        num_approx_correct_r_labels += len(approx_labels)
 
-        DEBUG_APPROX_MATCHING = False
-        if DEBUG_APPROX_MATCHING:
-            approx_only_matches = [
-                label for label in extracted_labels[:num_gold_labels]
-                if label not in gold_labels and any([approx_match(label, gold_label) for gold_label in gold_labels])
-            ]
-            if approx_only_matches:
-                print '\nFound approximate matches %s for gold labels %s\n' % (approx_only_matches, gold_labels)
+        # Update mistakes file
+        correct_labels = gold_labels.intersection(first_r_labels)
+        approx_only_matches = approx_labels.difference(correct_labels)
+        missed_labels = [
+            gold_label for gold_label in gold_labels
+            if not any([approx_match(label, gold_label) for label in first_r_labels])
+        ]
+        extraneous_labels = first_r_labels.difference(correct_labels).difference(approx_only_matches)
+        extra_labels = extracted_labels[num_gold_labels:]
+
+        mistakes.append((filename, gold_labels, correct_labels, approx_only_matches, missed_labels, extraneous_labels, extra_labels))
 
     print ' Done.'
     r_precision = float(num_correct_r_labels) / total_gold_labels
@@ -114,13 +114,16 @@ def print_results(results):
 def output_mistakes(mistakes_list, verbose):
     outputStr = ''
     with open(MISTAKES_FILENAME, 'w') as f:
-        for filename, correct_labels, missed_labels, extraneous_labels in mistakes_list:
+        for filename, gold_labels, correct_labels, approx_labels, missed_labels, extraneous_labels, extra_labels in mistakes_list:
             outputStr += '='*79 + '\n'
             outputStr += 'Mistakes for document %s:\n' % (filename)
             outputStr += '-'*50 + '\n'
-            outputStr += 'Correct labels: %s\n\n' % (', '.join(correct_labels))
-            outputStr += 'Missed labels: %s\n\n' % (', '.join(missed_labels))
-            outputStr += 'Extraneous labels: %s\n' % (', '.join(extraneous_labels))
+            outputStr += 'Gold labels -----> %s\n\n' % (', '.join(gold_labels))
+            outputStr += 'Correct labels ----> %s\n\n' % (', '.join(correct_labels))
+            outputStr += 'Approximately correct labels ----> %s\n\n' % (', '.join(approx_labels))
+            outputStr += 'Extraneous labels ----> %s\n\n' % (', '.join(extraneous_labels))
+            outputStr += 'Missed labels ----> %s\n\n' % (', '.join(missed_labels))
+            outputStr += 'Extra labels ----> %s\n' % (', '.join(extra_labels))
         f.write(outputStr.encode('utf-8'))
         if verbose:
             print outputStr
