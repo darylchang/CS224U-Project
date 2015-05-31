@@ -1,4 +1,5 @@
 import nltk
+import re
 
 
 ENCODING = 'utf-8'
@@ -9,9 +10,8 @@ USE_ALL_INSPEC = False
 # Contains readers that convert the various data sets into lists of
 # (tokens, keywords) pairs.
 
-# TODO: Don't break on newlines, tabs, and other escape characters (Keith)
 def clean_text(label):
-    return ' '.join(label.strip().lower().split())
+    return ' '.join([token for token in label.strip().lower().split() if token])
 
 def get_semicolon_separated_labels(label_text):
     return set([clean_text(label) for label in label_text.strip().split(';') if label])
@@ -50,7 +50,9 @@ def inspec_data_reader():
     examples = []
     for abstract_file, labels_file in zip(abstracts_filenames, labels_filenames):
         with open(data_dir + abstract_file, 'r') as f:
-            text = clean_text(f.read().decode(ENCODING))
+            raw_text = f.read().decode(ENCODING)
+            raw_lines = raw_text.strip().split('\r\n')
+            text = '\n'.join([clean_text(line) for line in raw_lines])
         with open(data_dir + labels_file, 'r') as f:
             label_text = f.read().decode(ENCODING)
         labels = get_semicolon_separated_labels(label_text)
@@ -66,8 +68,10 @@ def process_duc_labels(labels_lines):
 
 def process_duc_text(text):
     # Following usage in literature, only consider text in DUC-2001 dataset
-    # articles between the <TEXT> tags.
-    return text[text.find("<TEXT>") + len("<TEXT>") : text.rfind("</TEXT>")]
+    # articles between the <TEXT> tags. In addition, throw out the <P> tags
+    # present in the LA articles.
+    text = text[text.find("<TEXT>") + len("<TEXT>") : text.rfind("</TEXT>")]
+    return re.sub(r'</?P>', '', text)
 
 def duc_data_reader():
     data_dir = 'data/DUC2001/'  

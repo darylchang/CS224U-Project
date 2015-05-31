@@ -1,13 +1,25 @@
+import cooccurrence
 import evaluate
+import networkx as nx
+import nltk
 from nltk.corpus import wordnet
 from nltk.tokenize import RegexpTokenizer
-import nltk
+import numpy as np
+
 
 class BaseModel:
 
-    def __init__(self, stripPunct=True, stemRule=None, lemmatize=False, 
-    			 stripStopWords=True, synFilter=[wordnet.NOUN, wordnet.ADJ], 
-                 windowSize=None, keywordThreshold=5):
+    def __init__(self,
+        stripPunct=True,
+        stemRule=None,
+        lemmatize=False,
+        stripStopWords=True,
+        synFilter=[wordnet.NOUN, wordnet.ADJ], 
+        windowSize=None,
+        keywordThreshold=5,
+        numExtraLabels=5,
+        lengthPenaltyFn=None,
+    ):
         self.stripPunct = stripPunct
         self.stemRule = stemRule
         self.lemmatize = lemmatize
@@ -15,6 +27,8 @@ class BaseModel:
         self.synFilter = synFilter
         self.windowSize = windowSize
         self.keywordThreshold = keywordThreshold
+        self.numExtraLabels = numExtraLabels
+        self.lengthPenaltyFn = lengthPenaltyFn
 
     def tokenize(self, text):
         # Strip punctuation if unneeded for co-occurrence counts
@@ -55,6 +69,46 @@ class BaseModel:
             return wordnet.ADV
         else:
             return wordnet.NOUN
+
+    def create_graph(self, words):
+        cooccurrenceDict = cooccurrence.slidingWindowMatrix(words, self.windowSize, self.synFilter, self.stripStopWords)
+        return nx.Graph(cooccurrenceDict)
+
+    # TODO (Daryl): Look into interleaving nouns/adjs with adverbs and other POS
+    # TODO (all): to counteract longer keyphrases, implement a hard cutoff
+    #             after 4 tokens, but figure out how to still count subphrases
+    #             of keyphrases that are too long.
+    def combine_to_keyphrases(self, text, words, scores, min_num_labels):
+        sorted_scores = sorted(scores.items(), key=lambda x:x[1], reverse=True)[:self.keywordThreshold*min_num_labels]
+        keywords = [keyword for keyword, score in sorted_scores]
+        keyphrases = [(keyword,) for keyword in keywords]
+        keyphrase_scores = {(keyword,): (1, scores[keyword]) for keyword in keywords}
+
+        # Combine keywords into keyphrases
+        keyphrase = ()
+        for word in words:
+            word = word if not self.synFilter else word[0]
+            if word in keywords:
+                keyphrase += (word,)
+            else:
+                # TODO (all): this punctuation check may be too draconian, e.g.
+                #             'u.s. constitution' would be rejected because the
+                #             word tokens are ['u', 's', 'constitution']. But
+                #             this is primarily a tokenization problem.
+                if keyphrase and ' '.join(keyphrase) in text:
+                    score = np.sum([scores[keyword] for keyword in keyphrase])
+                    if self.lengthPenaltyFn:
+                        print 'Length penalty: %s being reducted from %s for length of %s' % (self.lengthPenaltyFn(len(keyphrase)), score, len(keyphrase))
+                        score -= self.lengthPenaltyFn(len(keyphrase))
+                    # TODO (all): once length penalty function is good, sort
+                    #             purely by score instead of length.
+                    keyphrase_scores[keyphrase] = (len(keyphrase), score)
+                    keyphrases.append(keyphrase)
+                keyphrase = ()
+
+        keyphrases = sorted(set(keyphrases), key=keyphrase_scores.get, reverse=True)
+        result = [' '.join(keyphrase) for keyphrase in keyphrases][:min_num_labels+self.numExtraLabels]
+        return result
 
     def extract_keyphrases(self, text, min_num_labels):
         raise NotImplementedError
