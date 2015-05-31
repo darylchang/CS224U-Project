@@ -12,4 +12,5 @@ from gridSearch import gridSearch
 options = dict()
 options['windowSize']=[5,10,15]
 options['keywordThreshold']=[4,5,6]
-gridSearch(DegreeCentralityModel, 3, options)
+options 
+gridSearch(PageRankModel, options, numExamples=3, verbose=True)

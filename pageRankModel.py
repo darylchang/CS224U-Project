@@ -1,6 +1,7 @@
 import cooccurrence
 import networkx as nx
 from model import BaseModel
+import numpy as np
 
 
 class PageRankModel(BaseModel):

@@ -6,8 +6,8 @@ import nltk
 class BaseModel:
 
     def __init__(self, stripPunct=True, stemRule=None, lemmatize=False, 
-    			 stripStopWords=True, synFilter=None, windowSize=None,
-                 keywordThreshold=5):
+    			 stripStopWords=True, synFilter=[wordnet.NOUN, wordnet.ADJ], 
+                 windowSize=None, keywordThreshold=5):
         self.stripPunct = stripPunct
         self.stemRule = stemRule
         self.lemmatize = lemmatize
@@ -60,4 +60,4 @@ class BaseModel:
         raise NotImplementedError
 
     def evaluate(self, numExamples=None, verbose=False):
-        evaluate.evaluate_extractor(self.extract_keyphrases, numExamples, verbose)
+        return evaluate.evaluate_extractor(self.extract_keyphrases, numExamples, verbose)

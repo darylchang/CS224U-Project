@@ -137,6 +137,7 @@ def evaluate_extractor(extractor, numExamples, verbose=False):
         mistakes_list += mistakes
     output_mistakes(mistakes_list, verbose)
     print_results(results)
+    return results
 
 if __name__=='__main__':
     from degreeCentralityModel import DegreeCentralityModel
