@@ -29,7 +29,7 @@ def contains_sublist(lst, sublst):
     n = len(sublst)
     return any((sublst == lst[i:i+n]) for i in xrange(len(lst) - n + 1))
 
-def approx_match(label, gold_label):
+def approx_match(label, gold_label, use_includes=False):
     if label == gold_label:
         return True
     # Approximate matching strategy from Zesch and Gurevych (2009).
@@ -37,7 +37,10 @@ def approx_match(label, gold_label):
     # INCLUDES matching strategies.
     singularized_label_tokens = [singularize(token) for token in label.split()]
     singularized_gold_label_tokens = [singularize(token) for token in gold_label.split()]
-    return contains_sublist(singularized_label_tokens, singularized_gold_label_tokens)
+    if use_includes:
+        return contains_sublist(singularized_label_tokens, singularized_gold_label_tokens)
+    else:
+        return singularized_label_tokens == singularized_gold_label_tokens
 
 def evaluate_extractor_on_dataset(extractor, dataset, numExamples):
     reader = READERS[dataset]
