@@ -1,5 +1,6 @@
 import itertools
 from scipy.stats.mstats import gmean
+import inspect
 
 
 DATASETS = ['Inspec', 'DUC-2001']
@@ -19,7 +20,12 @@ def gridSearch(options, numExamples, verbose=False):
 
     for paramCombo in paramCombos:
         print "Parameters: {}".format(paramCombo)
-        
+    
+    	# Create length penalty function from params
+        power, firstDenom, secondDenom = paramCombo['lengthPenaltyParams']
+        paramCombo['lengthPenaltyFn'] = lambda x: x**power/firstDenom if x<4 else x/secondDenom
+        del paramCombo['lengthPenaltyParams']
+
         constructor = paramCombo[MODEL_KEYWORD]
         del paramCombo[MODEL_KEYWORD]
         model = constructor(**paramCombo)

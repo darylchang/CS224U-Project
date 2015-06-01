@@ -11,8 +11,11 @@ from nltk.corpus import stopwords
 # between word (A,B) is if they occur in the chunks together. 
 STOP = stopwords.words('english')
 
-def findNgrams(inputList, n):
-  return zip(*[inputList[i:] for i in range(n)])
+def findNgrams(inputList, N=None):
+  if N:
+  	return zip(*[inputList[i:] for i in range(N)])
+  else:
+  	return [phrase for n in range(1,len(inputList)+1) for phrase in findNgrams(inputList,n)]
 
 def slidingWindowMatrix(words, N, synFilter, stripStopWords=True):	
 	cooccurrenceDict = defaultdict(lambda: defaultdict(int))

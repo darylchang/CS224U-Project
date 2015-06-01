@@ -1,9 +1,25 @@
 import matplotlib.pyplot as plt
 import numpy as np
 from collections import Counter
-
+from nltk.tokenize import RegexpTokenizer
 from parse import *
+import re
 
+# 98 labels that have punctuation in them, out of 7397 (~1%)
+def count_punctuated_keyphrases():
+    examples = inspec_data_reader() + duc_data_reader()
+    examples_with_labels = []
+    tokenizer = RegexpTokenizer(r'[\w\-]+')
+
+    for filename, text, labels in examples:
+        print filename
+        for label in labels:
+            if re.findall('[^\w\s\-/\+\']+', label):
+                examples_with_labels.append((label, tokenizer.tokenize(label)))
+
+    for label, tokenized_label in examples_with_labels:
+        print label, tokenized_label
+    print len(examples_with_labels)
 
 def count_keyphrase_lengths():
     examples = inspec_data_reader() + duc_data_reader()
@@ -64,4 +80,5 @@ def count_keyphrase_lengths():
     plt.show()
 
 if __name__=='__main__':
-    count_keyphrase_lengths()
+    #count_keyphrase_lengths()
+    count_punctuated_keyphrases()

@@ -15,7 +15,7 @@ class BaseModel:
         lemmatize=False,
         stripStopWords=True,
         synFilter=[wordnet.NOUN, wordnet.ADJ], 
-        windowSize=None,
+        windowSize=24,
         keywordThreshold=5,
         numExtraLabels=5,
         lengthPenaltyFn=None,
@@ -32,6 +32,7 @@ class BaseModel:
 
     def tokenize(self, text):
         # Strip punctuation if unneeded for co-occurrence counts
+        # TODO: Improve regex tokenizer so words like U.S. and numbers like 0.3 stay tokens (Daryl)
         if self.stripPunct:
             tokenizer = RegexpTokenizer(r'[\w\-]+')
             tokens = tokenizer.tokenize(text)
@@ -81,8 +82,9 @@ class BaseModel:
     def combine_to_keyphrases(self, text, words, scores, min_num_labels):
         sorted_scores = sorted(scores.items(), key=lambda x:x[1], reverse=True)[:self.keywordThreshold*min_num_labels]
         keywords = [keyword for keyword, score in sorted_scores]
-        keyphrases = [(keyword,) for keyword in keywords]
-        keyphrase_scores = {(keyword,): (1, scores[keyword]) for keyword in keywords}
+        keyphrases = set([(keyword,) for keyword in keywords])
+        keyphrase_scores = {(keyword,): scores[keyword]-self.lengthPenaltyFn(1) for keyword in keywords}
+
 
         # Combine keywords into keyphrases
         keyphrase = ()
@@ -95,18 +97,18 @@ class BaseModel:
                 #             'u.s. constitution' would be rejected because the
                 #             word tokens are ['u', 's', 'constitution']. But
                 #             this is primarily a tokenization problem.
-                if keyphrase and ' '.join(keyphrase) in text:
-                    score = np.sum([scores[keyword] for keyword in keyphrase])
-                    if self.lengthPenaltyFn:
-                        # print 'Length penalty: %s being reducted from %s for length of %s' % (self.lengthPenaltyFn(len(keyphrase)), score, len(keyphrase))
-                        score -= self.lengthPenaltyFn(len(keyphrase))
-                    # TODO (all): once length penalty function is good, sort
-                    #             purely by score instead of length.
-                    keyphrase_scores[keyphrase] = (len(keyphrase), score)
-                    keyphrases.append(keyphrase)
+                candidateKeyphrases = cooccurrence.findNgrams(keyphrase)
+                for candidateKeyphrase in candidateKeyphrases:
+                    if candidateKeyphrase and ' '.join(candidateKeyphrase) in text:
+                        score = np.sum([scores[keyword] for keyword in candidateKeyphrase])
+                        if self.lengthPenaltyFn:
+                            #print 'Length penalty: %s being reduced from %s for length of %s' % (self.lengthPenaltyFn(len(keyphrase)), score, len(keyphrase))
+                            score -= self.lengthPenaltyFn(len(candidateKeyphrase))
+                        keyphrase_scores[candidateKeyphrase] = score
+                        keyphrases.add(candidateKeyphrase)
                 keyphrase = ()
 
-        keyphrases = sorted(set(keyphrases), key=keyphrase_scores.get, reverse=True)
+        keyphrases = sorted(keyphrases, key=keyphrase_scores.get, reverse=True)
         result = [' '.join(keyphrase) for keyphrase in keyphrases][:min_num_labels+self.numExtraLabels]
         return result
 
