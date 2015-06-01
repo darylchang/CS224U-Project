@@ -46,7 +46,7 @@ def approx_match(label, gold_label, use_includes=False):
     else:
         return singularized_label_tokens == singularized_gold_label_tokens
 
-def evaluate_extractor_on_dataset(extractor, dataset, numExamples, verbose):
+def evaluate_extractor_on_dataset(extractor, dataset, numExamples, compute_mistakes):
     reader = READERS[dataset]
     examples = reader()
     tp, fp, fn = 0., 0., 0.
@@ -91,7 +91,7 @@ def evaluate_extractor_on_dataset(extractor, dataset, numExamples, verbose):
             if any([approx_match(label, gold_label) for label in first_r_labels])
         ])
 
-        if verbose:
+        if compute_mistakes:
             # Update mistakes file
             approx_labels = set([
                 label for label in first_r_labels
@@ -128,7 +128,7 @@ def print_results(results, skip_datasets):
         )
     print '='*73
 
-def output_mistakes(mistakes_list):
+def output_mistakes(mistakes_list, verbose):
     outputStr = ''
     with open(MISTAKES_FILENAME, 'w') as f:
         for filename, gold_labels, correct_labels, approx_labels, missed_labels, extraneous_labels, extra_labels in mistakes_list:
@@ -142,25 +142,20 @@ def output_mistakes(mistakes_list):
             outputStr += 'Extra labels ----> %s\n' % (', '.join(extra_labels))
             outputStr += '='*79 + '\n'
         f.write(outputStr.encode('utf-8'))
-        # if verbose:
-            # TODO (Daryl): Is printing to the terminal, in addition to writing
-            #               to a file, a necessity? If so, and if we need it to
-            #               be toggleable, the verbose keyword needs to have
-            #               multiple levels, or another keyword argument needs
-            #               to be added. I (Keith) now use the verbose flag to
-            #               speed up grid search by not computing mistakes for
-            #               every set of model parameters.
-            # print outputStr
+        if verbose:
+            print outputStr
 
-def evaluate_extractor(extractor, numExamples, verbose=False, skip_datasets=[]):
+def evaluate_extractor(extractor, numExamples, compute_mistakes=False, verbose=False, skip_datasets=[]):
     results = {}
     mistakes_list = []
     for dataset in DATASETS.difference(skip_datasets):
-        r_precision_approx, r_precision, (precision, recall, f1), mistakes = evaluate_extractor_on_dataset(extractor, dataset, numExamples, verbose)
+        r_precision_approx, r_precision, (precision, recall, f1), mistakes = evaluate_extractor_on_dataset(extractor, dataset, numExamples, compute_mistakes)
         results[dataset] = (r_precision_approx, r_precision, precision, recall, f1)
         mistakes_list += mistakes
-    if verbose:
-        output_mistakes(mistakes_list)
+    if compute_mistakes:
+        output_mistakes(mistakes_list, verbose)
+    elif verbose:
+        print 'WARNING: cannot print mistakes to terminal if compute_mistakes flag is False.'
     print_results(results, skip_datasets)
     return results
 
