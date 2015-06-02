@@ -80,9 +80,6 @@ def read_trigrams(extended_nouns=False):
     return pickle.load(open(read_file, "rb"))
 
 def get_matching_ngrams(ngrams, keyword_set):
-    # print '\nLooking for keywords in %s ngrams:\n%s\n' % (len(ngrams), keyword_set)
-    # for words in ngrams:
-    #     print 'Not all words in %s (count %s) present in keywords' % (words, ngrams[words])
     return [
         (words, ngrams[words]) for words in ngrams
         if all([word in keyword_set for word in words])

@@ -88,10 +88,10 @@ class BaseModel:
                 ngramScore = sum([wordScores[word] for word in ngramWords])
 
                 if self.ngramPenaltyFn and ngramWords not in keyphraseScores:
-                    print 'Subtracting %s ngram penalty from score of %s for ngram: %s' % (self.ngramPenaltyFn(len(ngramWords), ngramCount), ngramScore, ' '.join(ngramWords))
+                    # print 'Subtracting %s ngram penalty from score of %s for ngram: %s' % (self.ngramPenaltyFn(len(ngramWords), ngramCount), ngramScore, ' '.join(ngramWords))
                     ngramScore -= self.ngramPenaltyFn(len(ngramWords), ngramCount)
                 if self.ngramAdjacentBoostFn and ngramWords in keyphraseScores:
-                    print 'Adding %s adjacent ngram boost to score of %s for ngram: %s' % (self.ngramAdjacentBoostFn(len(ngramWords), ngramCount), ngramScore, ' '.join(ngramWords))
+                    # print 'Adding %s adjacent ngram boost to score of %s for ngram: %s' % (self.ngramAdjacentBoostFn(len(ngramWords), ngramCount), ngramScore, ' '.join(ngramWords))
                     ngramScore += self.ngramAdjacentBoostFn(len(ngramWords), ngramCount)
                 if self.lengthPenaltyFn:
                     ngramScore -= self.lengthPenaltyFn(len(ngramWords))
