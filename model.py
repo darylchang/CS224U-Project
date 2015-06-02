@@ -32,9 +32,14 @@ class BaseModel:
 
     def tokenize(self, text):
         # Strip punctuation if unneeded for co-occurrence counts
-        # TODO: Improve regex tokenizer so words like U.S. and numbers like 0.3 stay tokens (Daryl)
         if self.stripPunct:
-            tokenizer = RegexpTokenizer(r'[\w\-]+')
+            pattern = r'''(?x)               # set flag to allow verbose regexps
+                      ([A-Z]\.)+         # abbreviations, e.g. U.S.A.
+                      | \$?\d+(\.\d+)?%? # numbers, incl. currency and percentages
+                      | \w+([-']\w+)*    # words w/ optional internal hyphens/apostrophe
+                      | [+/\-@&*]        # special characters with meanings
+            '''
+            tokenizer = RegexpTokenizer(pattern)
             tokens = tokenizer.tokenize(text)
         else:
             tokens = [word for sent in nltk.sent_tokenize(text) for word in nltk.word_tokenize(sent)]
