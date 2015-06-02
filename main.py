@@ -29,19 +29,21 @@ trigrams = ngrams.read_trigrams()
 
 options = dict()
 options['model'] = [DegreeCentralityModel]
-# options['windowSize'] = [22, 24, 26, 28]
+options['useNgrams'] = [[bigrams, trigrams]]
+
+
+options['windowSize'] = [10, 15, 25]
+options['keywordThreshold'] = [3, 4, 5]
+
+options['ngramPenaltyParams'] = [0.05, 0.3, 0.6,]
+options['ngramAdjacentBoostParams'] = [1/75., 1/50., 1/25.,]
 
 powers = [3]
-firstDenoms = [40.]
-secondDenoms = [2.]
+firstDenoms = [60.]
+secondDenoms = [3.]
+
 
 combos = itertools.product(powers,firstDenoms,secondDenoms)
 options['lengthPenaltyParams'] = combos
-# options['keywordThreshold'] = [2, 3, 4, 5]
-
-options['useNgrams'] = [[bigrams, trigrams]]
-options['ngramPenaltyParams'] = [0.25,0.5]
-options['ngramAdjacentBoostParams'] = [1/50.]
-
-use_datasets = ['Inspec', 'DUC-2001']
+use_datasets = ['Inspec']
 gridSearch(options, use_datasets=use_datasets, numExamples=5, verbose=True)
