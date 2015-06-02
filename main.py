@@ -2,15 +2,24 @@ import networkx
 from degreeCentralityModel import DegreeCentralityModel
 from pageRankModel import PageRankModel
 import ngrams
+from ensembleModel import EnsembleModel
 from nltk.corpus import wordnet
 import nltk
 import numpy as np
 from gridSearch import gridSearch
 import itertools
+from scipy.stats.mstats import gmean
+from constants import *
 
 
 bigrams = ngrams.read_bigrams()
 trigrams = ngrams.read_trigrams()
+
+# model = DegreeCentralityModel(lengthPenaltyFn=lambda x: x**3/60. if x<4 else x/3., useCommunity=True)
+# results = model.evaluate(numExamples=5, compute_mistakes=True, verbose=False)
+# score = gmean([results[dataset][0] for dataset in DATASETS if dataset not in SKIP_DATASETS])
+# print score
+
 
 # lengthPenaltyFn = lambda x: x**3/60. if x<4 else x/3.
 # ngramPenaltyFn = lambda length, count: 0.4 * float(length) / np.sqrt(count)
@@ -18,6 +27,7 @@ trigrams = ngrams.read_trigrams()
 
 # model = DegreeCentralityModel(lengthPenaltyFn=lengthPenaltyFn, useNgrams=[bigrams, trigrams], ngramPenaltyFn=ngramPenaltyFn, ngramAdjacentBoostFn=ngramAdjacentBoostFn, keywordThreshold=10)
 # model.evaluate(numExamples=10, compute_mistakes=True, verbose=False)
+
 
 options = dict()
 options['model'] = [DegreeCentralityModel]

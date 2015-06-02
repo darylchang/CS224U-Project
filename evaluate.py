@@ -2,18 +2,7 @@ from baseline import *
 from parse import handwritten_data_reader, inspec_data_reader, duc_data_reader
 from pattern.en import singularize
 import sys
-
-DATASETS = set([
-    'Handwritten',
-    'Inspec',
-    'DUC-2001',
-])
-READERS = {
-    'Handwritten': handwritten_data_reader,
-    'Inspec': inspec_data_reader,
-    'DUC-2001': duc_data_reader,
-}
-MISTAKES_FILENAME = 'mistakes.txt'
+from constants import *
 
 # TODO: Look into using R-precision both token-wise and keyphrase-wise (partial matching, Daryl)
 

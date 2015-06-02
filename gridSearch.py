@@ -1,3 +1,4 @@
+from constants import *
 import itertools
 from scipy.stats.mstats import gmean
 import numpy as np
@@ -28,7 +29,6 @@ def gridSearch(options, numExamples, verbose=False):
         paramsStr = getParamsString(paramCombo)
         print "Parameters:\n%s" % (paramsStr)
         
-    
     	# Create length penalty function from params
         if 'lengthPenaltyParams' in paramCombo:
             power, firstDenom, secondDenom = paramCombo['lengthPenaltyParams']
@@ -51,7 +51,7 @@ def gridSearch(options, numExamples, verbose=False):
         paramCombo.update({MODEL_KEYWORD: constructor})
 
         results = model.evaluate(numExamples, verbose, SKIP_DATASETS)
-        score = gmean([results[dataset][0] for dataset in DATASETS])
+        score = gmean([results[dataset][0] for dataset in DATASETS if dataset not in SKIP_DATASETS])
 
         if score > bestScore:
             bestScore, bestCombo = score, paramsStr
