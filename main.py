@@ -1,13 +1,18 @@
 import networkx
 from degreeCentralityModel import DegreeCentralityModel
 from pageRankModel import PageRankModel
+from ensembleModel import EnsembleModel
 from nltk.corpus import wordnet
 import nltk
 from gridSearch import gridSearch
 import itertools
+from scipy.stats.mstats import gmean
+from constants import *
 
-model = DegreeCentralityModel(lengthPenaltyFn=lambda x: x**3/60. if x<4 else x/3.)
-model.evaluate(numExamples=5, compute_mistakes=True, verbose=False)
+model = EnsembleModel(lengthPenaltyFn=lambda x: x**3/60. if x<4 else x/3.)
+results = model.evaluate(numExamples=5, compute_mistakes=True, verbose=False)
+score = gmean([results[dataset][0] for dataset in DATASETS if dataset not in SKIP_DATASETS])
+print score
 
 # options = dict()
 # options['model'] = [DegreeCentralityModel]

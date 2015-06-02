@@ -1,12 +1,7 @@
 import itertools
 from scipy.stats.mstats import gmean
 import inspect
-
-
-DATASETS = ['Inspec', 'DUC-2001']
-SKIP_DATASETS = ['Handwritten']
-MODEL_KEYWORD = 'model'
-
+from constants import *
 
 def myProduct(dicts):
     return (dict(itertools.izip(dicts, x)) for x in itertools.product(*dicts.itervalues()))
@@ -33,7 +28,7 @@ def gridSearch(options, numExamples, verbose=False):
 
         results = model.evaluate(numExamples, verbose, SKIP_DATASETS)
         # TODO (all): tune datasets individually
-        score = gmean([results[dataset][0] for dataset in DATASETS])
+        score = gmean([results[dataset][0] for dataset in DATASETS if dataset not in SKIP_DATASETS])
 
         if score > bestScore:
             bestScore, bestCombo = score, paramCombo
