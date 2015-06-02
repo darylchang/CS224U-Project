@@ -3,10 +3,11 @@
 # POS tags: http://ucrel.lancs.ac.uk/claws7tags.html
 
 from collections import Counter
+import cPickle as pickle
 
 
-BIGRAM_FILE = 'ngrams/w2c.txt'
-TRIGRAM_FILE = 'ngrams/w3c.txt'
+RAW_BIGRAMS_FILE = 'ngrams/w2c.txt'
+RAW_TRIGRAMS_FILE = 'ngrams/w3c.txt'
 
 ADJECTIVE_TAGS = set(['jj', 'jjr', 'jjt'])
 BASIC_NOUN_TAGS = set(['nn', 'nn1', 'nn2'])
@@ -24,6 +25,23 @@ TRIGRAM_TAG_PATTERNS = [
     [BASIC_NOUN_TAGS, BASIC_NOUN_TAGS, BASIC_NOUN_TAGS],
 ]
 
+BIGRAM_EXT_TAG_PATTERNS = [
+    [ADJECTIVE_TAGS, ADJECTIVE_TAGS],
+    [ADJECTIVE_TAGS, EXTENDED_NOUN_TAGS],
+    [EXTENDED_NOUN_TAGS, EXTENDED_NOUN_TAGS],
+]
+
+TRIGRAM_EXT_TAG_PATTERNS = [
+    [ADJECTIVE_TAGS, ADJECTIVE_TAGS, EXTENDED_NOUN_TAGS],
+    [ADJECTIVE_TAGS, EXTENDED_NOUN_TAGS, EXTENDED_NOUN_TAGS],
+    [EXTENDED_NOUN_TAGS, EXTENDED_NOUN_TAGS, EXTENDED_NOUN_TAGS],
+]
+
+BIGRAMS_FILE = "ngrams/bigrams.p"
+BIGRAMS_EXT_FILE = "ngrams/bigrams_extended.p"
+TRIGRAMS_FILE = "ngrams/trigrams.p"
+TRIGRAMS_EXT_FILE = "ngrams/trigrams_extended.p"
+
 
 def tags_match_pattern(tag_list, patterns_list):
     for pattern in patterns_list:
@@ -31,31 +49,50 @@ def tags_match_pattern(tag_list, patterns_list):
             return True
     return False
 
-def read_bigrams():
+def write_pickled_bigrams(extended_nouns=False):
     bigrams = Counter()
-    with open(BIGRAM_FILE, 'r') as f:
+    tag_patterns = BIGRAM_EXT_TAG_PATTERNS if extended_nouns else BIGRAM_TAG_PATTERNS
+    with open(RAW_BIGRAMS_FILE, 'r') as f:
         for line in f.readlines():
             count, w1, w2, pos1, pos2 = line.strip().split()
-            if tags_match_pattern([pos1, pos2], BIGRAM_TAG_PATTERNS):
+            if tags_match_pattern([pos1, pos2], tag_patterns):
                 bigrams[(w1, w2)] += int(count)
-    return bigrams
+    write_file = BIGRAMS_EXT_FILE if extended_nouns else BIGRAMS_FILE
+    pickle.dump(bigrams, open(write_file, 'wb'))
 
-def read_trigrams():
+def write_pickled_trigrams(extended_nouns=False):
     trigrams = Counter()
-    with open(TRIGRAM_FILE, 'r') as f:
+    tag_patterns = TRIGRAM_EXT_TAG_PATTERNS if extended_nouns else TRIGRAM_TAG_PATTERNS
+    with open(RAW_TRIGRAMS_FILE, 'r') as f:
         for line in f.readlines():
             count, w1, w2, w3, pos1, pos2, pos3 = line.strip().split()
-            if tags_match_pattern([pos1, pos2, pos3], TRIGRAM_TAG_PATTERNS):
+            if tags_match_pattern([pos1, pos2, pos3], tag_patterns):
                 trigrams[(w1, w2, w3)] += int(count)
-    return trigrams
+    write_file = TRIGRAMS_EXT_FILE if extended_nouns else TRIGRAMS_FILE
+    pickle.dump(trigrams, open(write_file, 'wb'))
+
+def read_bigrams(extended_nouns=False):
+    read_file = BIGRAMS_EXT_FILE if extended_nouns else BIGRAMS_FILE
+    return pickle.load(open(read_file, "rb"))
+
+def read_trigrams(extended_nouns=False):
+    read_file = TRIGRAMS_EXT_FILE if extended_nouns else TRIGRAMS_FILE
+    return pickle.load(open(read_file, "rb"))
 
 def get_matching_ngrams(ngrams, keyword_set):
+    # print '\nLooking for keywords in %s ngrams:\n%s\n' % (len(ngrams), keyword_set)
+    # for words in ngrams:
+    #     print 'Not all words in %s (count %s) present in keywords' % (words, ngrams[words])
     return [
         (words, ngrams[words]) for words in ngrams
         if all([word in keyword_set for word in words])
     ]
 
 if __name__=='__main__':
+    # write_pickled_bigrams()
+    # write_pickled_trigrams()
+    # write_pickled_bigrams(extended_nouns=True)
+    # write_pickled_trigrams(extended_nouns=True)
     bigrams = read_bigrams()
     trigrams = read_trigrams()
     print len(bigrams), len(trigrams)

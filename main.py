@@ -1,13 +1,23 @@
 import networkx
 from degreeCentralityModel import DegreeCentralityModel
 from pageRankModel import PageRankModel
+import ngrams
 from nltk.corpus import wordnet
 import nltk
+import numpy as np
 from gridSearch import gridSearch
 import itertools
 
-model = DegreeCentralityModel(lengthPenaltyFn=lambda x: x**3/60. if x<4 else x/3.)
-model.evaluate(numExamples=5, compute_mistakes=True, verbose=False)
+
+bigrams = ngrams.read_bigrams()
+trigrams = ngrams.read_trigrams()
+
+lengthPenaltyFn = lambda x: x**3/60. if x<4 else x/3.
+ngramPenaltyFn = lambda length, count: 0.4 * float(length) / np.sqrt(count)
+ngramAdjacentBoostFn = lambda length, count: np.sqrt(length * count) / 50.
+
+model = DegreeCentralityModel(lengthPenaltyFn=lengthPenaltyFn, useNgrams=[bigrams, trigrams], ngramPenaltyFn=ngramPenaltyFn, ngramAdjacentBoostFn=ngramAdjacentBoostFn, keywordThreshold=10)
+model.evaluate(numExamples=10, compute_mistakes=True, verbose=False)
 
 # options = dict()
 # options['model'] = [DegreeCentralityModel]
