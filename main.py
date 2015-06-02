@@ -9,8 +9,8 @@ import itertools
 from scipy.stats.mstats import gmean
 from constants import *
 
-model = DegreeCentralityModel(lengthPenaltyFn=lambda x: x**3/60. if x<4 else x/3., useCommunity=True)
-results = model.evaluate(numExamples=5, compute_mistakes=True, verbose=False)
+model = DegreeCentralityModel(lengthPenaltyFn=lambda x: x**3/60. if x<4 else x/3., useCommunity=False)
+results = model.evaluate(numExamples=15, compute_mistakes=True, verbose=False)
 score = gmean([results[dataset][0] for dataset in DATASETS if dataset not in SKIP_DATASETS])
 print score
 
