@@ -43,10 +43,10 @@ class BaseModel:
     def tokenize(self, text):
         # Strip punctuation if unneeded for co-occurrence counts
         if self.stripPunct:
-            pattern = r'''(?x)               # set flag to allow verbose regexps
+            pattern = r'''(?x)           # set flag to allow verbose regexps
                       ([A-Z]\.)+         # abbreviations, e.g. U.S.A.
+                      | \-?[\d\w]+([-']\w+)*    # words w/ optional internal hyphens/apostrophe
                       | \$?\d+(\.\d+)?%? # numbers, incl. currency and percentages
-                      | \w+([-']\w+)*    # words w/ optional internal hyphens/apostrophe
                       | [+/\-@&*]        # special characters with meanings
             '''
             tokenizer = RegexpTokenizer(pattern)
