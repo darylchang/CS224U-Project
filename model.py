@@ -1,3 +1,4 @@
+from constants import *
 import cooccurrence
 import evaluate
 import ngrams
@@ -151,5 +152,5 @@ class BaseModel:
     def extract_keyphrases(self, text, min_num_labels):
         raise NotImplementedError
 
-    def evaluate(self, numExamples=None, compute_mistakes=False, verbose=False, use_datasets=[]):
+    def evaluate(self, numExamples=None, compute_mistakes=False, verbose=False, use_datasets=DATASETS):
         return evaluate.evaluate_extractor(self.extract_keyphrases, numExamples, compute_mistakes, verbose, use_datasets)
