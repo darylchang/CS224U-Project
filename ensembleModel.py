@@ -16,4 +16,4 @@ class EnsembleModel(BaseModel):
 		pagerank_scores = nx.pagerank(G)
 		hybrid_scores = {k: degree_scores[k] + 10 * pagerank_scores[k] for k in degree_scores}
 
-		return self.combine_to_keyphrases(text, words, hybrid_scores, min_num_labels)
+		return self.combine_to_keyphrases(text, words, [hybrid_scores], min_num_labels)

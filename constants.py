@@ -11,5 +11,4 @@ READERS = {
     'DUC-2001': duc_data_reader,
 }
 MISTAKES_FILENAME = 'mistakes.txt'
-SKIP_DATASETS = ['Handwritten']
 MODEL_KEYWORD = 'model'

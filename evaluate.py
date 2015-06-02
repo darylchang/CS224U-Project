@@ -69,14 +69,16 @@ def evaluate_extractor_on_dataset(extractor, dataset, numExamples, compute_mista
         # keyphrases matching a single candidate keyphrase.
         total_gold_labels += num_gold_labels
         first_r_labels = set(extracted_labels[:num_gold_labels])
-        num_correct_r_labels += len([
+        doc_num_correct_r_labels = len([
             gold_label for gold_label in gold_labels
             if gold_label in first_r_labels
         ])
-        num_approx_correct_r_labels += len([
+        doc_num_approx_correct_r_labels = len([
             gold_label for gold_label in gold_labels
             if any([approx_match(label, gold_label) for label in first_r_labels])
         ])
+        num_correct_r_labels += doc_num_correct_r_labels
+        num_approx_correct_r_labels += doc_num_approx_correct_r_labels
 
         if compute_mistakes:
             # Update mistakes file
@@ -93,17 +95,19 @@ def evaluate_extractor_on_dataset(extractor, dataset, numExamples, compute_mista
             extraneous_labels = first_r_labels.difference(correct_labels).difference(approx_only_matches)
             extra_labels = extracted_labels[num_gold_labels:]
 
-            mistakes.append((filename, gold_labels, correct_labels, approx_only_matches, missed_labels, extraneous_labels, extra_labels))
+            document_performance = float(doc_num_approx_correct_r_labels) / num_gold_labels
+
+            mistakes.append((filename, document_performance, len(text), gold_labels, correct_labels, approx_only_matches, missed_labels, extraneous_labels, extra_labels))
 
     print ' Done.'
     r_precision = float(num_correct_r_labels) / total_gold_labels
     r_precision_approx = float(num_approx_correct_r_labels) / total_gold_labels
     return r_precision_approx, r_precision, compute_stats(tp, fp, fn), mistakes
 
-def print_results(results, skip_datasets):
+def print_results(results, use_datasets):
     print '\n%-16s%-13s%-13s%-13s%-13s%-13s' % ('Dataset', 'R-P app.', 'R-P ex.', 'Precision', 'Recall', 'F1')
     print '-'*73, '\n'
-    for dataset in DATASETS.difference(skip_datasets):
+    for dataset in use_datasets:
         r_precision_approx, r_precision, precision, recall, f1 = results[dataset]
         print '%-16s%-.3f%-8s%-.3f%-8s%-.3f%-8s%-.3f%-8s%-.3f\n' % (
             dataset,
@@ -115,10 +119,13 @@ def print_results(results, skip_datasets):
         )
     print '='*73
 
-def output_mistakes(mistakes_list, verbose):
+def output_mistakes(mistakes_list, verbose, num_extreme_docs=10):
     outputStr = ''
     with open(MISTAKES_FILENAME, 'w') as f:
-        for filename, gold_labels, correct_labels, approx_labels, missed_labels, extraneous_labels, extra_labels in mistakes_list:
+        performance = {}
+        doc_lengths = {}
+        # TODO (anyone): if mistakes output gets slow, this would be faster with a list of strings and a '\n'.join
+        for filename, document_performance, doc_length, gold_labels, correct_labels, approx_labels, missed_labels, extraneous_labels, extra_labels in mistakes_list:
             outputStr += 'Mistakes for document %s:\n' % (filename)
             outputStr += '-'*50 + '\n'
             outputStr += 'Gold labels -----> %s\n\n' % (', '.join(gold_labels))
@@ -128,16 +135,24 @@ def output_mistakes(mistakes_list, verbose):
             outputStr += 'Missed labels ----> %s\n\n' % (', '.join(missed_labels))
             outputStr += 'Extra labels ----> %s\n' % (', '.join(extra_labels))
             outputStr += '='*79 + '\n'
+            performance[filename] = document_performance
+            doc_lengths[filename] = doc_length
+        sorted_performance = sorted(performance.keys(), key=performance.get)
+        outputStr += 'Worst documents:\n'
+        for filename in sorted_performance[:num_extreme_docs]:
+            outputStr += '\t%.3f %s (length: %s)\n' % (performance[filename], filename, doc_lengths[filename])
+        outputStr += 'Best documents:\n'
+        sorted_performance.reverse()
+        for filename in sorted_performance[:num_extreme_docs]:
+            outputStr += '\t%.3f %s (length: %s)\n' % (performance[filename], filename, doc_lengths[filename])
         f.write(outputStr.encode('utf-8'))
         if verbose:
             print outputStr
 
-def evaluate_extractor(extractor, numExamples, compute_mistakes=False, verbose=False, skip_datasets=[]):
-    # TODO (Keith): make skip_datasets into use_datasets()
-    # TODO (Keith): print sample wins and losses documents if compute_mistakes
+def evaluate_extractor(extractor, numExamples, compute_mistakes=False, verbose=False, use_datasets=DATASETS):
     results = {}
     mistakes_list = []
-    for dataset in DATASETS.difference(skip_datasets):
+    for dataset in use_datasets:
         r_precision_approx, r_precision, (precision, recall, f1), mistakes = evaluate_extractor_on_dataset(extractor, dataset, numExamples, compute_mistakes)
         results[dataset] = (r_precision_approx, r_precision, precision, recall, f1)
         mistakes_list += mistakes
@@ -145,7 +160,7 @@ def evaluate_extractor(extractor, numExamples, compute_mistakes=False, verbose=F
         output_mistakes(mistakes_list, verbose)
     elif verbose:
         print 'WARNING: cannot print mistakes to terminal if compute_mistakes flag is False.'
-    print_results(results, skip_datasets)
+    print_results(results, use_datasets)
     return results
 
 if __name__=='__main__':

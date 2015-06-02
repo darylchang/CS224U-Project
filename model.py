@@ -1,5 +1,7 @@
+from constants import *
 import cooccurrence
 import evaluate
+import ngrams
 import networkx as nx
 import nltk
 from nltk.corpus import wordnet
@@ -20,6 +22,9 @@ class BaseModel:
         numExtraLabels=5,
         lengthPenaltyFn=None,
         useCommunity=False,
+        useNgrams=[],
+        ngramPenaltyFn=None,
+        ngramAdjacentBoostFn=None,
     ):
         self.stripPunct = stripPunct
         self.stemRule = stemRule
@@ -31,6 +36,9 @@ class BaseModel:
         self.numExtraLabels = numExtraLabels
         self.lengthPenaltyFn = lengthPenaltyFn
         self.useCommunity = useCommunity
+        self.useNgrams = useNgrams
+        self.ngramPenaltyFn = ngramPenaltyFn
+        self.ngramAdjacentBoostFn = ngramAdjacentBoostFn
 
     def tokenize(self, text):
         # Strip punctuation if unneeded for co-occurrence counts
@@ -82,16 +90,30 @@ class BaseModel:
         cooccurrenceDict = cooccurrence.slidingWindowMatrix(words, self.windowSize, self.synFilter, self.stripStopWords)
         return nx.Graph(cooccurrenceDict)
 
+    def addCommonNgramsAndScores(self, keywords, wordScores, keyphraseScores):
+        for ngramsCounter in self.useNgrams:
+            for ngramWords, ngramCount in ngrams.get_matching_ngrams(ngramsCounter, keywords):
+                ngramScore = sum([wordScores[word] for word in ngramWords])
+
+                if self.ngramPenaltyFn and ngramWords not in keyphraseScores:
+                    # print 'Subtracting %s ngram penalty from score of %s for ngram: %s' % (self.ngramPenaltyFn(len(ngramWords), ngramCount), ngramScore, ' '.join(ngramWords))
+                    ngramScore -= self.ngramPenaltyFn(len(ngramWords), ngramCount)
+                if self.ngramAdjacentBoostFn and ngramWords in keyphraseScores:
+                    # print 'Adding %s adjacent ngram boost to score of %s for ngram: %s' % (self.ngramAdjacentBoostFn(len(ngramWords), ngramCount), ngramScore, ' '.join(ngramWords))
+                    ngramScore += self.ngramAdjacentBoostFn(len(ngramWords), ngramCount)
+                if self.lengthPenaltyFn:
+                    ngramScore -= self.lengthPenaltyFn(len(ngramWords))
+
+                if ngramWords not in keyphraseScores or ngramScore > keyphraseScores[ngramWords]:
+                    keyphraseScores[ngramWords] = ngramScore
+
     # TODO (Daryl): Look into interleaving nouns/adjs with adverbs and other POS
-    # TODO (all): try allowing combinations of nonadjacent keywords using frequent n-grams
-    # TODO (all): try model w/ ensemble approach for final keyphrase scoring
     def combine_to_keyphrases(self, text, words, scores_list, min_num_labels):
-        results = []
+        combinedKeyphraseScores = {}
         for scores in scores_list:
-            sorted_scores = sorted(scores.items(), key=lambda x:x[1], reverse=True)[:self.keywordThreshold*min_num_labels]
-            keywords = [keyword for keyword, score in sorted_scores]
-            keyphrases = set([(keyword,) for keyword in keywords])
-            keyphrase_scores = {(keyword,): scores[keyword]-self.lengthPenaltyFn(1) for keyword in keywords}
+            sortedScores = sorted(scores.items(), key=lambda x:x[1], reverse=True)[:self.keywordThreshold*min_num_labels]
+            keywords = set([keyword for keyword, score in sortedScores])
+            keyphraseScores = {(keyword,): scores[keyword]-self.lengthPenaltyFn(1) for keyword in keywords}
 
             # Combine keywords into keyphrases
             keyphrase = ()
@@ -103,20 +125,32 @@ class BaseModel:
                     candidateKeyphrases = cooccurrence.findNgrams(keyphrase)
                     for candidateKeyphrase in candidateKeyphrases:
                         if candidateKeyphrase and ' '.join(candidateKeyphrase) in text:
-                            score = np.sum([scores[keyword] for keyword in candidateKeyphrase])
+                            score = sum([scores[keyword] for keyword in candidateKeyphrase])
                             if self.lengthPenaltyFn:
-                                #print 'Length penalty: %s being reduced from %s for length of %s' % (self.lengthPenaltyFn(len(keyphrase)), score, len(keyphrase))
+                                # print 'Length penalty: %s being reduced from %s for length of %s' % (self.lengthPenaltyFn(len(keyphrase)), score, len(keyphrase))
                                 score -= self.lengthPenaltyFn(len(candidateKeyphrase))
-                            keyphrase_scores[candidateKeyphrase] = score
-                            keyphrases.add(candidateKeyphrase)
+                            keyphraseScores[candidateKeyphrase] = score
                     keyphrase = ()
 
-            keyphrases = sorted(keyphrases, key=keyphrase_scores.get, reverse=True)
-            results += [' '.join(keyphrase) for keyphrase in keyphrases][:min_num_labels+self.numExtraLabels]
-        return results
+            if self.useNgrams:
+                self.addCommonNgramsAndScores(keywords, scores, keyphraseScores)
+
+            # Add this set of keyphrase scores to the combined score dict,
+            # resolving conflicts by taking the higher score.
+            # TODO (all): Experiment with combinations other than max?
+            for keyphrase in keyphraseScores:
+                combinedKeyphraseScores[keyphrase] = max(
+                    combinedKeyphraseScores[keyphrase],
+                    keyphraseScores[keyphrase],
+                ) if keyphrase in combinedKeyphraseScores else keyphraseScores[keyphrase]
+
+        keyphrases = sorted(combinedKeyphraseScores.keys(), key=combinedKeyphraseScores.get, reverse=True)
+        result = [' '.join(keyphrase) for keyphrase in keyphrases][:min_num_labels+self.numExtraLabels]
+        return result
+
 
     def extract_keyphrases(self, text, min_num_labels):
         raise NotImplementedError
 
-    def evaluate(self, numExamples=None, compute_mistakes=False, verbose=False, skip_datasets=[]):
-        return evaluate.evaluate_extractor(self.extract_keyphrases, numExamples, compute_mistakes, verbose, skip_datasets)
+    def evaluate(self, numExamples=None, compute_mistakes=False, verbose=False, use_datasets=DATASETS):
+        return evaluate.evaluate_extractor(self.extract_keyphrases, numExamples, compute_mistakes, verbose, use_datasets)
