@@ -11,12 +11,17 @@ from nltk.corpus import stopwords
 # between word (A,B) is if they occur in the chunks together. 
 STOP = stopwords.words('english')
 
+
 def findNgrams(inputList, N=None):
   if N:
+  	N = min(N, len(inputList))
   	return zip(*[inputList[i:] for i in range(N)])
   else:
   	return [phrase for n in range(1,len(inputList)+1) for phrase in findNgrams(inputList,n)]
 
+# TODO (all): Consider scoring using multiple window sizes, or else really
+#			  limiting window size? For large N on the Inspec data set, there
+#			  are very few ngrams created.
 def slidingWindowMatrix(words, N, synFilter, stripStopWords=True):	
 	cooccurrenceDict = defaultdict(lambda: defaultdict(int))
 	nGrams = findNgrams(words, N)
