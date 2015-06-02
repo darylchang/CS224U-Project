@@ -19,6 +19,7 @@ class BaseModel:
         keywordThreshold=5,
         numExtraLabels=5,
         lengthPenaltyFn=None,
+        useCommunity=False,
     ):
         self.stripPunct = stripPunct
         self.stemRule = stemRule
@@ -29,6 +30,7 @@ class BaseModel:
         self.keywordThreshold = keywordThreshold
         self.numExtraLabels = numExtraLabels
         self.lengthPenaltyFn = lengthPenaltyFn
+        self.useCommunity = useCommunity
 
     def tokenize(self, text):
         # Strip punctuation if unneeded for co-occurrence counts
@@ -83,33 +85,35 @@ class BaseModel:
     # TODO (Daryl): Look into interleaving nouns/adjs with adverbs and other POS
     # TODO (all): try allowing combinations of nonadjacent keywords using frequent n-grams
     # TODO (all): try model w/ ensemble approach for final keyphrase scoring
-    def combine_to_keyphrases(self, text, words, scores, min_num_labels):
-        sorted_scores = sorted(scores.items(), key=lambda x:x[1], reverse=True)[:self.keywordThreshold*min_num_labels]
-        keywords = [keyword for keyword, score in sorted_scores]
-        keyphrases = set([(keyword,) for keyword in keywords])
-        keyphrase_scores = {(keyword,): scores[keyword]-self.lengthPenaltyFn(1) for keyword in keywords}
+    def combine_to_keyphrases(self, text, words, scores_list, min_num_labels):
+        results = []
+        for scores in scores_list:
+            sorted_scores = sorted(scores.items(), key=lambda x:x[1], reverse=True)[:self.keywordThreshold*min_num_labels]
+            keywords = [keyword for keyword, score in sorted_scores]
+            keyphrases = set([(keyword,) for keyword in keywords])
+            keyphrase_scores = {(keyword,): scores[keyword]-self.lengthPenaltyFn(1) for keyword in keywords}
 
-        # Combine keywords into keyphrases
-        keyphrase = ()
-        for word in words:
-            word = word if not self.synFilter else word[0]
-            if word in keywords:
-                keyphrase += (word,)
-            else:
-                candidateKeyphrases = cooccurrence.findNgrams(keyphrase)
-                for candidateKeyphrase in candidateKeyphrases:
-                    if candidateKeyphrase and ' '.join(candidateKeyphrase) in text:
-                        score = np.sum([scores[keyword] for keyword in candidateKeyphrase])
-                        if self.lengthPenaltyFn:
-                            #print 'Length penalty: %s being reduced from %s for length of %s' % (self.lengthPenaltyFn(len(keyphrase)), score, len(keyphrase))
-                            score -= self.lengthPenaltyFn(len(candidateKeyphrase))
-                        keyphrase_scores[candidateKeyphrase] = score
-                        keyphrases.add(candidateKeyphrase)
-                keyphrase = ()
+            # Combine keywords into keyphrases
+            keyphrase = ()
+            for word in words:
+                word = word if not self.synFilter else word[0]
+                if word in keywords:
+                    keyphrase += (word,)
+                else:
+                    candidateKeyphrases = cooccurrence.findNgrams(keyphrase)
+                    for candidateKeyphrase in candidateKeyphrases:
+                        if candidateKeyphrase and ' '.join(candidateKeyphrase) in text:
+                            score = np.sum([scores[keyword] for keyword in candidateKeyphrase])
+                            if self.lengthPenaltyFn:
+                                #print 'Length penalty: %s being reduced from %s for length of %s' % (self.lengthPenaltyFn(len(keyphrase)), score, len(keyphrase))
+                                score -= self.lengthPenaltyFn(len(candidateKeyphrase))
+                            keyphrase_scores[candidateKeyphrase] = score
+                            keyphrases.add(candidateKeyphrase)
+                    keyphrase = ()
 
-        keyphrases = sorted(keyphrases, key=keyphrase_scores.get, reverse=True)
-        result = [' '.join(keyphrase) for keyphrase in keyphrases][:min_num_labels+self.numExtraLabels]
-        return result
+            keyphrases = sorted(keyphrases, key=keyphrase_scores.get, reverse=True)
+            results += [' '.join(keyphrase) for keyphrase in keyphrases][:min_num_labels+self.numExtraLabels]
+        return results
 
     def extract_keyphrases(self, text, min_num_labels):
         raise NotImplementedError
