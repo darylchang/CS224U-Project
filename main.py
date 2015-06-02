@@ -17,8 +17,6 @@ trigrams = ngrams.read_trigrams()
 
 # model = DegreeCentralityModel(lengthPenaltyFn=lambda x: x**3/60. if x<4 else x/3., useCommunity=True)
 # results = model.evaluate(numExamples=5, compute_mistakes=True, verbose=False)
-# score = gmean([results[dataset][0] for dataset in DATASETS if dataset not in SKIP_DATASETS])
-# print score
 
 
 # lengthPenaltyFn = lambda x: x**3/60. if x<4 else x/3.
@@ -45,4 +43,5 @@ options['useNgrams'] = [[bigrams, trigrams]]
 options['ngramPenaltyParams'] = [0.25,0.5]
 options['ngramAdjacentBoostParams'] = [1/50.]
 
-gridSearch(options, numExamples=5, verbose=True)
+use_datasets = ['Inspec', 'DUC-2001']
+gridSearch(options, use_datasets=use_datasets, numExamples=5, verbose=True)

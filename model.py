@@ -107,7 +107,6 @@ class BaseModel:
                     keyphraseScores[ngramWords] = ngramScore
 
     # TODO (Daryl): Look into interleaving nouns/adjs with adverbs and other POS
-    # TODO (all): try model w/ ensemble approach for final keyphrase scoring
     def combine_to_keyphrases(self, text, words, scores_list, min_num_labels):
         combinedKeyphraseScores = {}
         for scores in scores_list:
@@ -152,5 +151,5 @@ class BaseModel:
     def extract_keyphrases(self, text, min_num_labels):
         raise NotImplementedError
 
-    def evaluate(self, numExamples=None, compute_mistakes=False, verbose=False, skip_datasets=[]):
-        return evaluate.evaluate_extractor(self.extract_keyphrases, numExamples, compute_mistakes, verbose, skip_datasets)
+    def evaluate(self, numExamples=None, compute_mistakes=False, verbose=False, use_datasets=[]):
+        return evaluate.evaluate_extractor(self.extract_keyphrases, numExamples, compute_mistakes, verbose, use_datasets)

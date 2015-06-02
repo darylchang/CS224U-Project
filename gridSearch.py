@@ -4,11 +4,6 @@ from scipy.stats.mstats import gmean
 import numpy as np
 
 
-DATASETS = ['Inspec', 'DUC-2001']
-SKIP_DATASETS = ['Handwritten']
-MODEL_KEYWORD = 'model'
-
-
 def myProduct(dicts):
     return (dict(itertools.izip(dicts, x)) for x in itertools.product(*dicts.itervalues()))
 
@@ -18,7 +13,7 @@ def getParamsString(paramCombo):
         lines.append('\t%.30s: %.80s' % (param, value))
     return '\n'.join(lines)
 
-def gridSearch(options, numExamples, verbose=False):
+def gridSearch(options, use_datasets, numExamples, verbose=False):
     if MODEL_KEYWORD not in options:
         print 'ERROR: must specify models for grid search under "%s" key.' % (MODEL_KEYWORD)
         return
@@ -50,8 +45,8 @@ def gridSearch(options, numExamples, verbose=False):
         model = constructor(**paramCombo)
         paramCombo.update({MODEL_KEYWORD: constructor})
 
-        results = model.evaluate(numExamples, verbose, SKIP_DATASETS)
-        score = gmean([results[dataset][0] for dataset in DATASETS if dataset not in SKIP_DATASETS])
+        results = model.evaluate(numExamples=numExamples, verbose=verbose, use_datasets=use_datasets)
+        score = gmean([results[dataset][0] for dataset in use_datasets])
 
         if score > bestScore:
             bestScore, bestCombo = score, paramsStr

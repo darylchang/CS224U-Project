@@ -100,10 +100,10 @@ def evaluate_extractor_on_dataset(extractor, dataset, numExamples, compute_mista
     r_precision_approx = float(num_approx_correct_r_labels) / total_gold_labels
     return r_precision_approx, r_precision, compute_stats(tp, fp, fn), mistakes
 
-def print_results(results, skip_datasets):
+def print_results(results, use_datasets):
     print '\n%-16s%-13s%-13s%-13s%-13s%-13s' % ('Dataset', 'R-P app.', 'R-P ex.', 'Precision', 'Recall', 'F1')
     print '-'*73, '\n'
-    for dataset in DATASETS.difference(skip_datasets):
+    for dataset in use_datasets:
         r_precision_approx, r_precision, precision, recall, f1 = results[dataset]
         print '%-16s%-.3f%-8s%-.3f%-8s%-.3f%-8s%-.3f%-8s%-.3f\n' % (
             dataset,
@@ -132,12 +132,11 @@ def output_mistakes(mistakes_list, verbose):
         if verbose:
             print outputStr
 
-def evaluate_extractor(extractor, numExamples, compute_mistakes=False, verbose=False, skip_datasets=[]):
-    # TODO (Keith): make skip_datasets into use_datasets()
+def evaluate_extractor(extractor, numExamples, compute_mistakes=False, verbose=False, use_datasets=DATASETS):
     # TODO (Keith): print sample wins and losses documents if compute_mistakes
     results = {}
     mistakes_list = []
-    for dataset in DATASETS.difference(skip_datasets):
+    for dataset in use_datasets:
         r_precision_approx, r_precision, (precision, recall, f1), mistakes = evaluate_extractor_on_dataset(extractor, dataset, numExamples, compute_mistakes)
         results[dataset] = (r_precision_approx, r_precision, precision, recall, f1)
         mistakes_list += mistakes
@@ -145,7 +144,7 @@ def evaluate_extractor(extractor, numExamples, compute_mistakes=False, verbose=F
         output_mistakes(mistakes_list, verbose)
     elif verbose:
         print 'WARNING: cannot print mistakes to terminal if compute_mistakes flag is False.'
-    print_results(results, skip_datasets)
+    print_results(results, use_datasets)
     return results
 
 if __name__=='__main__':
