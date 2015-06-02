@@ -21,6 +21,22 @@ def count_punctuated_keyphrases():
         print label, tokenized_label
     print len(examples_with_labels)
 
+def calc_optimal_R_p():
+    dataset_examples = {
+        'Inspec': inspec_data_reader(),
+        'DUC2001': duc_data_reader(),
+    }
+    for dataset in dataset_examples:
+        label_counts = Counter()
+        for filename, text, labels in dataset_examples[dataset]:
+            for label in labels:
+                if label in text:
+                    label_counts['in'] += 1
+                else:
+                    label_counts['out'] += 1
+        total_labels = label_counts['in'] + label_counts['out']
+        print '%s dataset: maximum R-precision %.2f' % (dataset, float(label_counts['in']) / total_labels)
+
 def count_keyphrase_lengths():
     examples = inspec_data_reader() + duc_data_reader()
     counter = Counter()
@@ -82,3 +98,4 @@ def count_keyphrase_lengths():
 if __name__=='__main__':
     #count_keyphrase_lengths()
     count_punctuated_keyphrases()
+    # calc_optimal_R_p()

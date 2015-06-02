@@ -32,6 +32,7 @@ def gridSearch(options, numExamples, verbose=False):
         paramCombo.update({MODEL_KEYWORD: constructor})
 
         results = model.evaluate(numExamples, verbose, SKIP_DATASETS)
+        # TODO (all): tune datasets individually
         score = gmean([results[dataset][0] for dataset in DATASETS])
 
         if score > bestScore:

@@ -76,15 +76,13 @@ class BaseModel:
         return nx.Graph(cooccurrenceDict)
 
     # TODO (Daryl): Look into interleaving nouns/adjs with adverbs and other POS
-    # TODO (all): to counteract longer keyphrases, implement a hard cutoff
-    #             after 4 tokens, but figure out how to still count subphrases
-    #             of keyphrases that are too long.
+    # TODO (all): try allowing combinations of nonadjacent keywords using frequent n-grams
+    # TODO (all): try model w/ ensemble approach for final keyphrase scoring
     def combine_to_keyphrases(self, text, words, scores, min_num_labels):
         sorted_scores = sorted(scores.items(), key=lambda x:x[1], reverse=True)[:self.keywordThreshold*min_num_labels]
         keywords = [keyword for keyword, score in sorted_scores]
         keyphrases = set([(keyword,) for keyword in keywords])
         keyphrase_scores = {(keyword,): scores[keyword]-self.lengthPenaltyFn(1) for keyword in keywords}
-
 
         # Combine keywords into keyphrases
         keyphrase = ()
@@ -93,10 +91,6 @@ class BaseModel:
             if word in keywords:
                 keyphrase += (word,)
             else:
-                # TODO (all): this punctuation check may be too draconian, e.g.
-                #             'u.s. constitution' would be rejected because the
-                #             word tokens are ['u', 's', 'constitution']. But
-                #             this is primarily a tokenization problem.
                 candidateKeyphrases = cooccurrence.findNgrams(keyphrase)
                 for candidateKeyphrase in candidateKeyphrases:
                     if candidateKeyphrase and ' '.join(candidateKeyphrase) in text:

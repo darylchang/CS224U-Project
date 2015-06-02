@@ -16,7 +16,6 @@ READERS = {
 MISTAKES_FILENAME = 'mistakes.txt'
 
 # TODO: Look into using R-precision both token-wise and keyphrase-wise (partial matching, Daryl)
-# TODO: Give some indication of optimal performance, i.e., if matched all gold keyphrases in text (Keith)
 # TODO: Make sure nothing returns 0 keyphrases (Keith)
 
 def F1(precision, recall):
@@ -146,6 +145,8 @@ def output_mistakes(mistakes_list, verbose):
             print outputStr
 
 def evaluate_extractor(extractor, numExamples, compute_mistakes=False, verbose=False, skip_datasets=[]):
+    # TODO (Keith): make skip_datasets into use_datasets()
+    # TODO (Keith): print sample wins and losses documents if compute_mistakes
     results = {}
     mistakes_list = []
     for dataset in DATASETS.difference(skip_datasets):
