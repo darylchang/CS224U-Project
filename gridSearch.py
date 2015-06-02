@@ -37,7 +37,7 @@ def gridSearch(options, use_datasets, numExamples, verbose=False):
             del paramCombo['ngramPenaltyParams']
         if 'ngramAdjacentBoostParams' in paramCombo:
             constant = paramCombo['ngramAdjacentBoostParams']
-            paramCombo['ngramAdjacentBoostFn'] = lambda length, count: constant * np.sqrt(length * count) / 50.
+            paramCombo['ngramAdjacentBoostFn'] = lambda length, count: constant * np.sqrt(length * count)
             del paramCombo['ngramAdjacentBoostParams']
 
         constructor = paramCombo[MODEL_KEYWORD]
