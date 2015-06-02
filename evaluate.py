@@ -82,6 +82,8 @@ def evaluate_extractor_on_dataset(extractor, dataset, numExamples, compute_mista
 
         if compute_mistakes:
             # Update mistakes file
+            # TODO (Keith): separate missed labels by in-text and not in-text
+            # TODO (Keith): consider some "ranking error" score to see if extra labels contain golds
             approx_labels = set([
                 label for label in first_r_labels
                 if any([approx_match(label, gold_label) for gold_label in gold_labels])

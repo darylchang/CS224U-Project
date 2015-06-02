@@ -46,3 +46,4 @@ combos = itertools.product(powers,firstDenoms,secondDenoms)
 options['lengthPenaltyParams'] = combos
 use_datasets = ['DUC-2001']
 gridSearch(options, use_datasets=use_datasets, numExamples=None, verbose=True)
+
