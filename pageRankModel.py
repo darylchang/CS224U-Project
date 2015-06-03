@@ -43,16 +43,16 @@ class PageRankModel(BaseModel):
         # Get keywords by node centrality
         scores = nx.pagerank(G, max_iter=500)
         if 'linear diophantine equations' in text:
-            print '\n'
-            print words
-            print '\n'
-            cooccurrenceDict, G = self.create_graph(words, TODOdelete=True)
+            # print '\n'
+            # print words
+            # print '\n'
+            # cooccurrenceDict, G = self.create_graph(words, TODOdelete=True)
             print
             for keyword in sorted(scores.keys(), key=scores.get, reverse=True):
                 print '%s: %s' % (keyword, scores[keyword])
-            custom_scores = self.custom_pagerank(cooccurrenceDict, print_progress=True)
-            print 'Custom pagerank scores:'
-            for keyword in sorted(custom_scores.keys(), key=custom_scores.get, reverse=True):
-                print '%s: %s' % (keyword, custom_scores[keyword])
+            # custom_scores = self.custom_pagerank(cooccurrenceDict, print_progress=True)
+            # print 'Custom pagerank scores:'
+            # for keyword in sorted(custom_scores.keys(), key=custom_scores.get, reverse=True):
+            #     print '%s: %s' % (keyword, custom_scores[keyword])
 
         return self.combine_to_keyphrases(text, words, [scores], min_num_labels)

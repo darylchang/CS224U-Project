@@ -10,12 +10,12 @@ class DegreeCentralityModel(BaseModel):
     def extract_keyphrases(self, text, min_num_labels):
         # Tokenize text
         words = self.tokenize(text) # Note: tuples if using a synFilter
-        G = self.create_graph(words)
+        cooccurrence_dict, G = self.create_graph(words)
 
         # Get keywords by node centrality
         scores = nx.degree_centrality(G)
-        print
         if 'linear diophantine equations' in text:
+            print
             for keyword in sorted(scores.keys(), key=scores.get):
                 print '%s: %s' % (keyword, scores[keyword])
 
