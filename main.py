@@ -16,7 +16,8 @@ import dill
 bigrams = ngrams.read_bigrams()
 trigrams = ngrams.read_trigrams()
 
-# model = DegreeCentralityModel(lengthPenaltyFn=lambda x: x**3/60. if x<4 else x/3., useCommunity=True)
+model = DegreeCentralityModel(lengthPenaltyFn=lambda x: x**3/60. if x<4 else x/3., useCommunity=True)
+model.draw_graph('data/Inspec/Test/2113.abstr')
 # results = model.evaluate(numExamples=5, compute_mistakes=True, verbose=False)
 
 
@@ -27,21 +28,23 @@ trigrams = ngrams.read_trigrams()
 # model = DegreeCentralityModel(lengthPenaltyFn=lengthPenaltyFn, useNgrams=[bigrams, trigrams], ngramPenaltyFn=ngramPenaltyFn, ngramAdjacentBoostFn=ngramAdjacentBoostFn, keywordThreshold=10)
 # model.evaluate(numExamples=50, compute_mistakes=True, verbose=False)
 
-options = dict()
-options['model'] = [PageRankModel]
-options['useNgrams'] = [[]]#[[bigrams, trigrams]]
 
 
-options['windowSize'] = [3]
-options['keywordThreshold'] = [3]
-#options['ngramPenaltyParams'] = [0.05]
-#options['ngramAdjacentBoostParams'] = [1/25.]
-powers = [3]
-firstDenoms = [60.]
-secondDenoms = [3.]
+# options = dict()
+# options['model'] = [PageRankModel]
+# options['useNgrams'] = [[]]#[[bigrams, trigrams]]
 
-# Combine length penalty parameters
-combos = itertools.product(powers,firstDenoms,secondDenoms)
-#options['lengthPenaltyParams'] = combos
-use_datasets = ['Inspec']
-gridSearch(options, use_datasets=use_datasets, numExamples=None, verbose=False)
+
+# options['windowSize'] = [3]
+# options['keywordThreshold'] = [3]
+# #options['ngramPenaltyParams'] = [0.05]
+# #options['ngramAdjacentBoostParams'] = [1/25.]
+# powers = [3]
+# firstDenoms = [60.]
+# secondDenoms = [3.]
+
+# # Combine length penalty parameters
+# combos = itertools.product(powers,firstDenoms,secondDenoms)
+# #options['lengthPenaltyParams'] = combos
+# use_datasets = ['Inspec']
+# gridSearch(options, use_datasets=use_datasets, numExamples=None, verbose=False)

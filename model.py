@@ -159,3 +159,13 @@ class BaseModel:
 
     def evaluate(self, numExamples=None, compute_mistakes=False, verbose=False, use_datasets=DATASETS):
         return evaluate.evaluate_extractor(self.extract_keyphrases, numExamples, compute_mistakes, verbose, use_datasets)
+
+    def draw_graph(self, docName):
+        text = open(docName).read()
+        words = self.tokenize(text) # Note: tuples if using a synFilter
+        cooccurrence_dict, G = self.create_graph(words)
+        G = self.create_graph(cooccurrence_dict)
+        labels = nx.draw_networkx_labels(G)
+        labels = nx.draw_networkx_edge_labels(G)
+        plt.show('graph.png') 
+
