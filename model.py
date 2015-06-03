@@ -88,7 +88,7 @@ class BaseModel:
 
     def create_graph(self, words):
         cooccurrenceDict = cooccurrence.slidingWindowMatrix(words, self.windowSize, self.synFilter, self.stripStopWords)
-        return nx.DiGraph(cooccurrenceDict)
+        return cooccurrenceDict, nx.DiGraph(cooccurrenceDict)
 
     def addCommonNgramsAndScores(self, keywords, wordScores, keyphraseScores):
         for ngramsCounter in self.useNgrams:
