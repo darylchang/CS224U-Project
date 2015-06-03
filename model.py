@@ -84,10 +84,12 @@ class BaseModel:
         elif tag.startswith('RB'):
             return wordnet.ADV
         else:
-            return wordnet.NOUN
+            return ''
+            # TODO (all): this was returning waaaaay too many nouns
+            # return wordnet.NOUN
 
-    def create_graph(self, words):
-        cooccurrenceDict = cooccurrence.slidingWindowMatrix(words, self.windowSize, self.synFilter, self.stripStopWords)
+    def create_graph(self, words, TODOdelete=False):
+        cooccurrenceDict = cooccurrence.slidingWindowMatrix(words, self.windowSize, self.synFilter, self.stripStopWords, TODOdelete=TODOdelete)
         return cooccurrenceDict, nx.DiGraph(cooccurrenceDict)
 
     def addCommonNgramsAndScores(self, keywords, wordScores, keyphraseScores):

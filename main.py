@@ -32,8 +32,8 @@ options['model'] = [PageRankModel]
 options['useNgrams'] = [[]]#[[bigrams, trigrams]]
 
 
-options['windowSize'] = [25]
-options['keywordThreshold'] = [4]
+options['windowSize'] = [3]
+options['keywordThreshold'] = [3]
 #options['ngramPenaltyParams'] = [0.05]
 #options['ngramAdjacentBoostParams'] = [1/25.]
 powers = [3]

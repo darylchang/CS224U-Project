@@ -2,7 +2,6 @@ from constants import *
 import itertools
 from scipy.stats.mstats import gmean
 import numpy as np
-from pathos.multiprocessing import Pool
 from functools import partial
 import sys, os
 import dill
@@ -16,9 +15,10 @@ def getParamsString(paramCombo):
         lines.append('\t%.30s: %.80s' % (param, value))
     return '\n'.join(lines)
 
-def testCombo(paramCombo, use_datasets, numExamples, verbose):
+def testCombo(paramCombo, use_datasets, numExamples, verbose, parallelize=True):
     paramsStr = getParamsString(paramCombo)
-    sys.stdout = open(str(os.getpid()) + ".out", "a")
+    if parallelize:
+        sys.stdout = open(str(os.getpid()) + ".out", "a")
 
     # Create length penalty function from params
     if 'lengthPenaltyParams' in paramCombo:
@@ -49,20 +49,29 @@ def testCombo(paramCombo, use_datasets, numExamples, verbose):
     return score, paramCombo 
 
 
-def gridSearch(options, use_datasets, numExamples, verbose=False):
+def gridSearch(options, use_datasets, numExamples, verbose=False, parallelize=False):
     if MODEL_KEYWORD not in options:
         print 'ERROR: must specify models for grid search under "%s" key.' % (MODEL_KEYWORD)
         return
     paramCombos = myProduct(options)
     partialTestCombo = partial(testCombo, use_datasets=use_datasets, numExamples=numExamples, verbose=verbose)
-    p = Pool(5)
-    try:
-        result = p.map_async(partialTestCombo, paramCombos)
-        result = result.get(999999999)
-        bestScore, bestCombo = max(result, key=lambda x:x[0])
-        sys.stdout = open("best.out", "w")
+    if parallelize:
+        from pathos.multiprocessing import Pool
+        p = Pool(5)
+        try:
+            result = p.map_async(partialTestCombo, paramCombos)
+            result = result.get(999999999)
+            bestScore, bestCombo = max(result, key=lambda x:x[0])
+            sys.stdout = open("best.out", "w")
+            print 'Best score of %s was achieved by parameters:\n%s' % (bestScore, bestCombo)
+        except KeyboardInterrupt:
+            p.terminate()
+            print "You cancelled the program!"
+            sys.exit(1)
+    else:
+        bestScore, bestCombo = float('-inf'), None
+        for paramCombo in paramCombos:
+            score = testCombo(paramCombo, use_datasets=use_datasets, numExamples=numExamples, verbose=verbose, parallelize=False)
+            if score > bestScore:
+                bestScore, bestCombo = score, paramCombo
         print 'Best score of %s was achieved by parameters:\n%s' % (bestScore, bestCombo)
-    except KeyboardInterrupt:
-        p.terminate()
-        print "You cancelled the program!"
-        sys.exit(1)
