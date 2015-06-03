@@ -27,22 +27,20 @@ trigrams = ngrams.read_trigrams()
 # model.evaluate(numExamples=50, compute_mistakes=True, verbose=False)
 
 options = dict()
-options['model'] = [DegreeCentralityModel]
-options['useNgrams'] = [[bigrams, trigrams]]
+options['model'] = [PageRankModel]
+options['useNgrams'] = [[]]#[[bigrams, trigrams]]
 
 
-options['windowSize'] = [10, 15, 25]
-options['keywordThreshold'] = [3, 4, 5]
-
-options['ngramPenaltyParams'] = [0.05, 0.3, 0.6,]
-options['ngramAdjacentBoostParams'] = [1/75., 1/50., 1/25.,]
-
+options['windowSize'] = [25]
+options['keywordThreshold'] = [4]
+#options['ngramPenaltyParams'] = [0.05]
+#options['ngramAdjacentBoostParams'] = [1/25.]
 powers = [3]
 firstDenoms = [60.]
 secondDenoms = [3.]
 
 
 combos = itertools.product(powers,firstDenoms,secondDenoms)
-options['lengthPenaltyParams'] = combos
-use_datasets = ['DUC-2001']
-gridSearch(options, use_datasets=use_datasets, numExamples=None, verbose=True)
+#options['lengthPenaltyParams'] = combos
+use_datasets = ['Inspec']
+gridSearch(options, use_datasets=use_datasets, numExamples=None, verbose=False)
