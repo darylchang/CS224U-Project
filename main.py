@@ -10,7 +10,8 @@ from gridSearch import gridSearch
 import itertools
 from scipy.stats.mstats import gmean
 from constants import *
-
+from multiprocessing import Pool
+import dill
 
 bigrams = ngrams.read_bigrams()
 trigrams = ngrams.read_trigrams()
@@ -39,7 +40,7 @@ powers = [3]
 firstDenoms = [60.]
 secondDenoms = [3.]
 
-
+# Combine length penalty parameters
 combos = itertools.product(powers,firstDenoms,secondDenoms)
 #options['lengthPenaltyParams'] = combos
 use_datasets = ['Inspec']
