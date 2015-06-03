@@ -48,5 +48,5 @@ options['lengthPenaltyParams'] = combos
 
 # Run grid search with multiprocessing
 use_datasets = ['DUC-2001']
-gridSearch(options, use_datasets=use_datasets, numExamples=1, verbose=True)
+gridSearch(options, use_datasets=use_datasets, numExamples=None, verbose=True)
 
