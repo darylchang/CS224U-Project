@@ -10,7 +10,8 @@ from gridSearch import gridSearch
 import itertools
 from scipy.stats.mstats import gmean
 from constants import *
-
+from multiprocessing import Pool
+import dill
 
 bigrams = ngrams.read_bigrams()
 trigrams = ngrams.read_trigrams()
@@ -30,7 +31,7 @@ options = dict()
 options['model'] = [DegreeCentralityModel]
 options['useNgrams'] = [[bigrams, trigrams]]
 
-
+# Params to change for grid search
 options['windowSize'] = [10, 15, 25]
 options['keywordThreshold'] = [3, 4, 5]
 
@@ -41,9 +42,11 @@ powers = [3]
 firstDenoms = [60.]
 secondDenoms = [3.]
 
-
+# Combine length penalty parameters
 combos = itertools.product(powers,firstDenoms,secondDenoms)
 options['lengthPenaltyParams'] = combos
+
+# Run grid search with multiprocessing
 use_datasets = ['DUC-2001']
-gridSearch(options, use_datasets=use_datasets, numExamples=None, verbose=True)
+gridSearch(options, use_datasets=use_datasets, numExamples=1, verbose=True)
 
