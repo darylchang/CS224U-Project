@@ -88,7 +88,7 @@ class BaseModel:
 
     def create_graph(self, words):
         cooccurrenceDict = cooccurrence.slidingWindowMatrix(words, self.windowSize, self.synFilter, self.stripStopWords)
-        return nx.Graph(cooccurrenceDict)
+        return nx.DiGraph(cooccurrenceDict)
 
     def addCommonNgramsAndScores(self, keywords, wordScores, keyphraseScores):
         for ngramsCounter in self.useNgrams:
@@ -111,9 +111,12 @@ class BaseModel:
     def combine_to_keyphrases(self, text, words, scores_list, min_num_labels):
         combinedKeyphraseScores = {}
         for scores in scores_list:
-            sortedScores = sorted(scores.items(), key=lambda x:x[1], reverse=True)[:self.keywordThreshold*min_num_labels]
+            sortedScores = sorted(scores.items(), key=lambda x:x[1], reverse=True)[:int(self.keywordThreshold*min_num_labels)]
             keywords = set([keyword for keyword, score in sortedScores])
-            keyphraseScores = {(keyword,): scores[keyword]-self.lengthPenaltyFn(1) for keyword in keywords}
+            keyphraseScores = {(keyword,): scores[keyword] for keyword in keywords}
+            if self.lengthPenaltyFn:
+                for singleKeyword in keyphraseScores:
+                    keyphraseScores[singleKeyword] -= self.lengthPenaltyFn(1)
 
             # Combine keywords into keyphrases
             keyphrase = ()

@@ -3,3 +3,4 @@
 .DS_Store
 mistakes.txt
 graphs/
+gridsearch_results*
