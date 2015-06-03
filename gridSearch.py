@@ -4,7 +4,7 @@ from scipy.stats.mstats import gmean
 import numpy as np
 from pathos.multiprocessing import Pool
 from functools import partial
-import sys
+import sys, os
 import dill
 
 def myProduct(dicts):
@@ -18,7 +18,8 @@ def getParamsString(paramCombo):
 
 def testCombo(paramCombo, use_datasets, numExamples, verbose):
     paramsStr = getParamsString(paramCombo)
-    
+    sys.stdout = open(str(os.getpid()) + ".out", "a")
+
     # Create length penalty function from params
     if 'lengthPenaltyParams' in paramCombo:
         power, firstDenom, secondDenom = paramCombo['lengthPenaltyParams']
@@ -59,6 +60,7 @@ def gridSearch(options, use_datasets, numExamples, verbose=False):
         result = p.map_async(partialTestCombo, paramCombos)
         result = result.get(999999999)
         bestScore, bestCombo = max(result, key=lambda x:x[0])
+        sys.stdout = open("best.out", "w")
         print 'Best score of %s was achieved by parameters:\n%s' % (bestScore, bestCombo)
     except KeyboardInterrupt:
         p.terminate()
