@@ -12,12 +12,15 @@ from scipy.stats.mstats import gmean
 from constants import *
 from multiprocessing import Pool
 import dill
+from opennlp import opennlp
 
-bigrams = ngrams.read_bigrams()
-trigrams = ngrams.read_trigrams()
+opennlp.tag("Hello world.")
 
-model = DegreeCentralityModel(lengthPenaltyFn=lambda x: x**3/60. if x<4 else x/3., useCommunity=True)
-model.draw_graph('data/Inspec/Test/2113.abstr')
+# bigrams = ngrams.read_bigrams()
+# trigrams = ngrams.read_trigrams()
+
+# model = DegreeCentralityModel(lengthPenaltyFn=lambda x: x**3/60. if x<4 else x/3., useCommunity=True, windowSize=6)
+# model.draw_graph('data/Inspec/Test/2113.abstr')
 # results = model.evaluate(numExamples=5, compute_mistakes=True, verbose=False)
 
 

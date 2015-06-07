@@ -7,6 +7,8 @@ import nltk
 from nltk.corpus import wordnet
 from nltk.tokenize import RegexpTokenizer
 import numpy as np
+from parse import *
+from matplotlib import pyplot as plt
 
 
 class BaseModel:
@@ -161,11 +163,10 @@ class BaseModel:
         return evaluate.evaluate_extractor(self.extract_keyphrases, numExamples, compute_mistakes, verbose, use_datasets)
 
     def draw_graph(self, docName):
-        text = open(docName).read()
-        words = self.tokenize(text) # Note: tuples if using a synFilter
+        examples = inspec_data_reader()
+        docText = [text for filename, text, gold_labels in examples if filename == docName][0]
+        words = self.tokenize(docText) # Note: tuples if using a synFilter
         cooccurrence_dict, G = self.create_graph(words)
-        G = self.create_graph(cooccurrence_dict)
-        labels = nx.draw_networkx_labels(G)
-        labels = nx.draw_networkx_edge_labels(G)
-        plt.show('graph.png') 
-
+        G = G.to_undirected()
+        labels = nx.draw_graphviz(G, with_labels=True, edge_color='0.5', width=0.5, font_color='blue', node_color='0.5', node_size=800)
+        plt.show() 

@@ -13,7 +13,6 @@ STOP = stopwords.words('english')
 
 
 def findNgrams(inputList, N=None):
-  print inputList
   if N:
     N = min(N, len(inputList))
     return zip(*[inputList[i:] for i in range(N)])
