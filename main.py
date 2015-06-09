@@ -29,19 +29,19 @@ trigrams = ngrams.read_trigrams()
 
 options = dict()
 options['model'] = [PageRankModel]
-options['useNgrams'] = [[]]#[[bigrams, trigrams]]
+options['useNgrams'] = [[]]
 
 
 options['windowSize'] = [3]
-options['keywordThreshold'] = [3]
-#options['ngramPenaltyParams'] = [0.05]
-#options['ngramAdjacentBoostParams'] = [1/25.]
+options['keywordThreshold'] = [6]
+options['ngramPenaltyParams'] = [0.05]
+options['ngramAdjacentBoostParams'] = [1/75.]
 powers = [3]
-firstDenoms = [60.]
-secondDenoms = [3.]
+firstDenoms = [15000.]
+secondDenoms = [110.]
 
 # Combine length penalty parameters
 combos = itertools.product(powers,firstDenoms,secondDenoms)
-#options['lengthPenaltyParams'] = combos
-use_datasets = ['Inspec']
-gridSearch(options, use_datasets=use_datasets, numExamples=None, verbose=False)
+options['lengthPenaltyParams'] = combos
+use_datasets = [INSPEC_DATASET]
+gridSearch(options, use_datasets=use_datasets, numExamples=None, compute_mistakes=True, verbose=True)

@@ -15,7 +15,7 @@ def getParamsString(paramCombo):
         lines.append('\t%.30s: %.80s' % (param, value))
     return '\n'.join(lines)
 
-def testCombo(paramCombo, use_datasets, numExamples, verbose, parallelize=True):
+def testCombo(paramCombo, use_datasets, numExamples, compute_mistakes=False, verbose=False, parallelize=True):
     paramsStr = getParamsString(paramCombo)
     if parallelize:
         sys.stdout = open(str(os.getpid()) + ".out", "a")
@@ -41,20 +41,20 @@ def testCombo(paramCombo, use_datasets, numExamples, verbose, parallelize=True):
     model = constructor(**paramCombo)
     paramCombo.update({MODEL_KEYWORD: constructor})
 
-    results = model.evaluate(numExamples=numExamples, verbose=verbose, use_datasets=use_datasets)
+    results = model.evaluate(numExamples=numExamples, compute_mistakes=compute_mistakes, verbose=verbose, use_datasets=use_datasets)
     score = gmean([results[dataset][0] for dataset in use_datasets])
 
     print "Parameters:\n%s" % (paramsStr)
     print "Score: {}\n\n\n".format(score)
-    return score, paramCombo 
+    return score, paramsStr, paramCombo 
 
 
-def gridSearch(options, use_datasets, numExamples, verbose=False, parallelize=False):
+def gridSearch(options, use_datasets, numExamples, compute_mistakes=False, verbose=False, parallelize=False):
     if MODEL_KEYWORD not in options:
         print 'ERROR: must specify models for grid search under "%s" key.' % (MODEL_KEYWORD)
         return
     paramCombos = myProduct(options)
-    partialTestCombo = partial(testCombo, use_datasets=use_datasets, numExamples=numExamples, verbose=verbose)
+    partialTestCombo = partial(testCombo, use_datasets=use_datasets, numExamples=numExamples, compute_mistakes=compute_mistakes, verbose=verbose)
     if parallelize:
         from pathos.multiprocessing import Pool
         p = Pool(5)
@@ -69,9 +69,9 @@ def gridSearch(options, use_datasets, numExamples, verbose=False, parallelize=Fa
             print "You cancelled the program!"
             sys.exit(1)
     else:
-        bestScore, bestCombo = float('-inf'), None
+        bestScore, bestCombo, bestComboStr = float('-inf'), None, ''
         for paramCombo in paramCombos:
-            score = testCombo(paramCombo, use_datasets=use_datasets, numExamples=numExamples, verbose=verbose, parallelize=False)
+            score, paramsStr, _ = testCombo(paramCombo, use_datasets=use_datasets, numExamples=numExamples, compute_mistakes=compute_mistakes, verbose=verbose, parallelize=False)
             if score > bestScore:
-                bestScore, bestCombo = score, paramCombo
-        print 'Best score of %s was achieved by parameters:\n%s' % (bestScore, bestCombo)
+                bestScore, bestCombo, bestComboStr = score, paramCombo, paramsStr
+        print 'Best score of %s was achieved by parameters:\n%s' % (bestScore, bestComboStr)

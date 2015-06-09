@@ -114,6 +114,7 @@ class BaseModel:
         combinedKeyphraseScores = {}
         for scores in scores_list:
             sortedScores = sorted(scores.items(), key=lambda x:x[1], reverse=True)[:int(self.keywordThreshold*min_num_labels)]
+            # TextRank number of scores: [:max(min_num_labels, int(round(len(scores)/3.)))]
             keywords = set([keyword for keyword, score in sortedScores])
             keyphraseScores = {(keyword,): scores[keyword] for keyword in keywords}
             if self.lengthPenaltyFn:
