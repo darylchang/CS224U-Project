@@ -30,17 +30,17 @@ options = dict()
 options['model'] = [DegreeCentralityModel]
 options['useNgrams'] = [[bigrams, trigrams]]
 
-options['windowSize'] = [5,6,7]
+options['windowSize'] = [3, 6]
 options['keywordThreshold'] = [3, 5]
 
-options['ngramPenaltyParams'] = [0.05]
+options['ngramPenaltyParams'] = [0.05, 0.2]
 options['ngramAdjacentBoostParams'] = [1/60.]
 
 powers = [3]
-firstDenoms = [100]
-secondDenoms = [10., 15.]
+firstDenoms = [100, 250, 1000]
+secondDenoms = [5., 10.]
 
 combos = itertools.product(powers,firstDenoms,secondDenoms)
 options['lengthPenaltyParams'] = combos
-use_datasets = [INSPEC_DATASET]
-gridSearch(options, use_datasets=use_datasets, numExamples=None, verbose=False)
+use_datasets = [DUC_DATASET]
+gridSearch(options, use_datasets=use_datasets, numExamples=None, verbose=True, parallelize=True)
