@@ -125,7 +125,6 @@ def output_mistakes(mistakes_list, verbose, num_extreme_docs=10):
     with open(MISTAKES_FILENAME, 'w') as f:
         performance = {}
         doc_lengths = {}
-        # TODO (anyone): if mistakes output gets slow, this would be faster with a list of strings and a '\n'.join
         for filename, document_performance, doc_length, gold_labels, correct_labels, approx_labels, missed_labels, extraneous_labels, extra_labels in mistakes_list:
             outputStr += 'Mistakes for document %s:\n' % (filename)
             outputStr += '-'*50 + '\n'

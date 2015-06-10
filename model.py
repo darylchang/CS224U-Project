@@ -5,7 +5,6 @@ import ngrams
 import networkx as nx
 import nltk
 from nltk.corpus import wordnet
-from nltk.tokenize import RegexpTokenizer
 import numpy as np
 from parse import *
 from matplotlib import pyplot as plt
@@ -74,10 +73,10 @@ class BaseModel:
         result = []
         for token in output.split():
             if token.endswith('_``'):
-                print '\nRetrying POS tagging for %s' % (token)
+                # print '\nRetrying POS tagging for %s' % (token)
                 p = Popen(command, shell=True, stdout=PIPE, stdin=PIPE, stderr=STDOUT)
                 token = p.communicate(input=token.split('_')[0])[0].split('\n')[1]
-                print '\tGot new token: %s' % (token)
+                # print '\tGot new token: %s' % (token)
             word, tag = token.split('_')
             result.append((word, self.wordnetPosCode(tag)))
         return result
@@ -162,7 +161,6 @@ class BaseModel:
 
         # Add this set of keyphrase scores to the combined score dict,
         # resolving conflicts by taking the higher score.
-        # TODO (all): Experiment with combinations other than max?
         for keyphrase in keyphraseScores:
             combinedKeyphraseScores[keyphrase] = max(
                 combinedKeyphraseScores[keyphrase],
