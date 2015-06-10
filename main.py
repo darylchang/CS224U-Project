@@ -42,5 +42,5 @@ secondDenoms = [5.]
 
 combos = itertools.product(powers,firstDenoms,secondDenoms)
 options['lengthPenaltyParams'] = combos
-use_datasets = [DUC_DATASET]
+use_datasets = [INSPEC_DATASET]
 gridSearch(options, use_datasets=use_datasets, numExamples=None, verbose=True, parallelize=True)
