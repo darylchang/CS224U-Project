@@ -31,9 +31,10 @@ def tag(tokens):
         if token.endswith('_``'):
             p = Popen(command, shell=True, stdout=PIPE, stdin=PIPE, stderr=STDOUT)
             token = p.communicate(input=token.split('_')[0])[0].split('\n')[1]
-
-        word, tag = token.split('_')        
-        result.append(word + '_' + (wordnetPosCode(tag)))
+        if token:
+            tag_index = token.rfind('_')
+            word, tag = token[:tag_index], token[tag_index+1:]
+            result.append(word + '_' + (wordnetPosCode(tag)))
     return result
 
 def get_tokens(text):
@@ -49,9 +50,15 @@ def write_tokens_to_file(tagged_tokens, filename):
         f.write(out_text)
 
 def convert_examples(examples):
-    for filename, text, labels in examples[:2] + examples[-2:]:
+    num_done = 0
+    for filename, text, labels in examples:
         tagged_tokens = tag(get_tokens(text))
         write_tokens_to_file(tagged_tokens, convert_filename_to_pos_tagged(filename))
+        num_done += 1
+        if num_done % 10 == 0:
+            print 'Finished %s of %s examples' % (num_done, len(examples))
 
 if __name__=='__main__':
-    convert_examples(inspec_data_reader() + duc_data_reader())
+    #examples = inspec_data_reader()[250:]
+    examples = duc_data_reader()[20:40]
+    convert_examples(examples)
