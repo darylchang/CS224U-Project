@@ -26,7 +26,6 @@ trigrams = ngrams.read_trigrams()
 # model = DegreeCentralityModel(lengthPenaltyFn=lengthPenaltyFn, useNgrams=[bigrams, trigrams], ngramPenaltyFn=ngramPenaltyFn, ngramAdjacentBoostFn=ngramAdjacentBoostFn, keywordThreshold=10)
 # model.evaluate(numExamples=50, compute_mistakes=True, verbose=False)
 
-
 options = dict()
 options['model'] = [DegreeCentralityModel]
 options['useNgrams'] = [[bigrams, trigrams]]
@@ -43,6 +42,5 @@ secondDenoms = [5.]
 
 combos = itertools.product(powers,firstDenoms,secondDenoms)
 options['lengthPenaltyParams'] = combos
-use_datasets = [INSPEC_DATASET]
-
-gridSearch(options, use_datasets=use_datasets, numExamples=None, verbose=False)
+use_datasets = [DUC_DATASET]
+gridSearch(options, use_datasets=use_datasets, numExamples=None, verbose=True, parallelize=True)
