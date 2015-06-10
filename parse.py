@@ -32,8 +32,9 @@ def handwritten_data_reader():
         examples.append((data_dir + filename, text, labels))
     return examples
 
-def inspec_data_reader():
+def inspec_data_reader(use_pretagged=True):
     data_dir = 'data/Inspec/'
+    text_data_dir = 'data/POS-Tagged/Inspec/' if use_pretagged else data_dir
     abstracts_listings = ['test_abstracts.txt']
     labels_listings = ['test_labels.txt']
     if USE_ALL_INSPEC:
@@ -49,14 +50,14 @@ def inspec_data_reader():
 
     examples = []
     for abstract_file, labels_file in zip(abstracts_filenames, labels_filenames):
-        with open(data_dir + abstract_file, 'r') as f:
+        with open(text_data_dir + abstract_file, 'r') as f:
             raw_text = f.read().decode(ENCODING)
             raw_lines = raw_text.strip().split('\r\n')
             text = '\n'.join([clean_text(line) for line in raw_lines])
         with open(data_dir + labels_file, 'r') as f:
             label_text = f.read().decode(ENCODING)
         labels = get_semicolon_separated_labels(label_text)
-        examples.append((data_dir + abstract_file, text, labels))
+        examples.append((text_data_dir + abstract_file, text, labels))
     return examples
 
 def process_duc_labels(labels_lines):
@@ -73,8 +74,9 @@ def process_duc_text(text):
     text = text[text.find("<TEXT>") + len("<TEXT>") : text.rfind("</TEXT>")]
     return re.sub(r'</?P>', '', text)
 
-def duc_data_reader():
-    data_dir = 'data/DUC2001/'  
+def duc_data_reader(use_pretagged=True):
+    data_dir = 'data/DUC2001/'
+    text_data_dir = 'data/POS-Tagged/DUC2001/' if use_pretagged else data_dir  
     with open(data_dir + 'documents.txt') as documents_list:
         document_filenames = [filename.strip() for filename in documents_list.readlines()]
     with open(data_dir + 'annotations.txt', 'r') as labels_file:
@@ -83,10 +85,10 @@ def duc_data_reader():
     examples = []
     labels = process_duc_labels(labels_lines)
     for document_filename in document_filenames:
-        with open(data_dir + document_filename, 'r') as document:
+        with open(text_data_dir + document_filename, 'r') as document:
             text = document.read().decode(ENCODING)
         article_text = clean_text(process_duc_text(text))
-        examples.append((data_dir + document_filename, article_text, labels[document_filename]))
+        examples.append((text_data_dir + document_filename, article_text, labels[document_filename]))
     return examples
 
 if __name__=='__main__':
