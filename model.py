@@ -180,7 +180,6 @@ class BaseModel:
 
         # Add this set of keyphrase scores to the combined score dict,
         # resolving conflicts by taking the higher score.
-        # TODO (all): Experiment with combinations other than max?
         for keyphrase in keyphraseScores:
             combinedKeyphraseScores[keyphrase] = max(
                 combinedKeyphraseScores[keyphrase],
