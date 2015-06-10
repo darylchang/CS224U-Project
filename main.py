@@ -30,14 +30,14 @@ options = dict()
 options['model'] = [DegreeCentralityModel]
 options['useNgrams'] = [[bigrams, trigrams]]
 
-options['windowSize'] = [3, 6]
-options['keywordThreshold'] = [3, 5]
+options['windowSize'] = [5, 6, 7]
+options['keywordThreshold'] = [2, 3]
 
-options['ngramPenaltyParams'] = [0.05, 0.2]
+options['ngramPenaltyParams'] = [0.05, 0.1]
 options['ngramAdjacentBoostParams'] = [1/60.]
 
 powers = [3]
-firstDenoms = [100, 250, 1000]
+firstDenoms = [100]
 secondDenoms = [5., 10.]
 
 combos = itertools.product(powers,firstDenoms,secondDenoms)

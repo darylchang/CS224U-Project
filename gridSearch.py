@@ -63,7 +63,7 @@ def gridSearch(options, use_datasets, numExamples, compute_mistakes=False, verbo
             result = result.get(999999999)
             bestScore, bestParamsStr, bestCombo = max(result, key=lambda x:x[0])
             sys.stdout = open("best.out", "w")
-            print 'Best score of %s was achieved by parameters:\n%s' % (bestScore, bestCombo)
+            print 'Best score of %s was achieved by parameters:\n%s' % (bestScore, bestParamsStr)
         except KeyboardInterrupt:
             p.terminate()
             print "You cancelled the program!"
