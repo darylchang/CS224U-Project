@@ -169,6 +169,19 @@ class BaseModel:
 
         keyphrases = sorted(combinedKeyphraseScores.keys(), key=combinedKeyphraseScores.get, reverse=True)
         result = [' '.join(keyphrase) for keyphrase in keyphrases][:min_num_labels+self.numExtraLabels]
+
+        # If we haven't reached the minimum number of labels, add unigrams in order of score
+        if self.lemmatize:
+            unigrams_and_scores = [(word, score) for lemma, score in sortedScores for word in self.lemmasToWords[lemma]]
+        else:
+            unigrams_and_scores = [(word, score) for word, score in sortedScores]
+        unigrams_and_scores = sorted(unigrams_and_scores, key=lambda t: t[1], reverse=True)
+        i = 0
+        while i < len(unigrams_and_scores) and \
+            len(result) < min_num_labels + self.numExtraLabels and \
+            unigrams_and_scores[i][0] not in result:
+            result.append(unigrams_and_scores[i][0])
+            i += 1
         return result
 
 
