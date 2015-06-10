@@ -20,31 +20,23 @@ def findNgrams(inputList, N=None):
     return [phrase for n in range(1,len(inputList)+1) for phrase in findNgrams(inputList,n)]
 
 def getSynFilteredNgram(synFilter, nGram):
-    if not synFilter:
-        return nGram
     words = []
     for word, tag in nGram:
-        if tag in synFilter:
+        if tag in synFilter or not synFilter:
             words.append(word)
     return words
 
 # TODO (all): Consider scoring using multiple window sizes, or else really
 #             limiting window size? For large N on the Inspec data set, there
 #             are very few ngrams created.
-def slidingWindowMatrix(words, N, synFilter, stripStopWords=True, TODOdelete=False):  
+def slidingWindowMatrix(words, N, synFilter, stripStopWords=True):
     cooccurrenceDict = defaultdict(lambda: defaultdict(lambda: defaultdict(int)))
     nGrams = findNgrams(words, N)
     for nGram in nGrams:
-        if TODOdelete:
-            print '\t%s' % (str(nGram))
         nGram = getSynFilteredNgram(synFilter, nGram)
-        if TODOdelete:
-            print '\t\t%s' % (str(nGram))
         for wordOne in nGram:
             for wordTwo in nGram:
                 if wordOne != wordTwo:
-                    if TODOdelete:
-                        print '%s and %s co-occur' % (wordOne, wordTwo)
                     if not stripStopWords:
                         cooccurrenceDict[wordOne][wordTwo]['weight'] += 1.
                     elif stripStopWords and wordOne not in STOP and wordTwo not in STOP:
