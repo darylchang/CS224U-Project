@@ -16,9 +16,8 @@ import dill
 bigrams = ngrams.read_bigrams()
 trigrams = ngrams.read_trigrams()
 
-model = DegreeCentralityModel(lengthPenaltyFn=lambda x: x**3/60. if x<4 else x/3., useCommunity=True, windowSize=6)
-# model.draw_graph('data/Inspec/Test/2113.abstr')
-results = model.evaluate(numExamples=15, compute_mistakes=True, verbose=False)
+model = DegreeCentralityModel(lengthPenaltyFn=lambda x: x**3/60. if x<4 else x/3., windowSize=6, lemmatize=False)
+model.evaluate(numExamples=5, compute_mistakes=True, verbose=True)
 
 
 # lengthPenaltyFn = lambda x: x**3/60. if x<4 else x/3.
