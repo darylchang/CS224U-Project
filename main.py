@@ -16,8 +16,8 @@ import dill
 bigrams = ngrams.read_bigrams()
 trigrams = ngrams.read_trigrams()
 
-# model = DegreeCentralityModel(lengthPenaltyFn=lambda x: x**3/180. if x<4 else x/3., windowSize=6, lemmatize=False)
-# model.evaluate(numExamples=50, compute_mistakes=True, verbose=True)
+# model = DegreeCentralityModel(lengthPenaltyFn=lambda x: x**3/200. if x<4 else x/3., windowSize=6, lemmatize=False)
+# model.evaluate(numExamples=15, compute_mistakes=False, verbose=False)
 
 # lengthPenaltyFn = lambda x: x**3/60. if x<4 else x/3.
 # ngramPenaltyFn = lambda length, count: 0.3 * float(length) / np.sqrt(count)
@@ -44,4 +44,5 @@ secondDenoms = [5., 10.]
 combos = itertools.product(powers,firstDenoms,secondDenoms)
 options['lengthPenaltyParams'] = combos
 use_datasets = [INSPEC_DATASET]
+
 gridSearch(options, use_datasets=use_datasets, numExamples=None, verbose=False)

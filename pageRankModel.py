@@ -42,4 +42,4 @@ class PageRankModel(BaseModel):
 
         # Get keywords by node centrality
         scores = nx.pagerank(G, max_iter=500)
-        return self.combine_to_keyphrases(text, words, [scores], min_num_labels)
+        return self.combine_to_keyphrases(words, scores, min_num_labels)

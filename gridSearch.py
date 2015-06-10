@@ -61,7 +61,7 @@ def gridSearch(options, use_datasets, numExamples, compute_mistakes=False, verbo
         try:
             result = p.map_async(partialTestCombo, paramCombos)
             result = result.get(999999999)
-            bestScore, bestCombo = max(result, key=lambda x:x[0])
+            bestScore, bestParamsStr, bestCombo = max(result, key=lambda x:x[0])
             sys.stdout = open("best.out", "w")
             print 'Best score of %s was achieved by parameters:\n%s' % (bestScore, bestCombo)
         except KeyboardInterrupt:
