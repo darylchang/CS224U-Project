@@ -16,8 +16,8 @@ import dill
 bigrams = ngrams.read_bigrams()
 trigrams = ngrams.read_trigrams()
 
-model = DegreeCentralityModel(lengthPenaltyFn=lambda x: x**3/180. if x<4 else x/3., windowSize=6, lemmatize=False)
-model.evaluate(numExamples=50, compute_mistakes=True, verbose=True)
+model = PageRankModel(lengthPenaltyFn=lambda x: x**3/200. if x<4 else x/3., windowSize=6, lemmatize=False)
+model.evaluate(numExamples=5, compute_mistakes=True, verbose=True)
 
 # lengthPenaltyFn = lambda x: x**3/60. if x<4 else x/3.
 # ngramPenaltyFn = lambda length, count: 0.3 * float(length) / np.sqrt(count)
