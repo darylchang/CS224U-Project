@@ -5,6 +5,14 @@ from nltk.tokenize import RegexpTokenizer
 from parse import *
 import re
 
+def count_average_labels():
+    inspec_examples = inspec_data_reader()
+    token_counts = [len(text.split()) for filename, text, labels in inspec_examples]
+    print 'Inspec average number of words: %s' % (np.mean(token_counts))
+    duc_examples = duc_data_reader()
+    token_counts = [len(text.split()) for filename, text, labels in duc_examples]
+    print 'Duc average number of words: %s' % (np.mean(token_counts))
+
 # 98 labels that have punctuation in them, out of 7397 (~1%)
 def count_punctuated_keyphrases():
     examples = inspec_data_reader() + duc_data_reader()
@@ -97,5 +105,6 @@ def count_keyphrase_lengths():
 
 if __name__=='__main__':
     #count_keyphrase_lengths()
-    count_punctuated_keyphrases()
+    # count_punctuated_keyphrases()
     # calc_optimal_R_p()
+    count_average_labels()
