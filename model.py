@@ -62,13 +62,9 @@ class BaseModel:
         words = [t.lower() for t in tokens]
         
         # POS tagging
-<<<<<<< HEAD
-        taggedWords = [(word, self.wordnetPosCode(tag)) for word, tag in nltk.pos_tag(words)]
-=======
         if self.lemmatize or self.synFilter:
             taggedWords = self.tag(words)
             # taggedWords = [(word, self.wordnetPosCode(tag)) for word, tag in nltk.pos_tag(words)]
->>>>>>> 3885f7de01becaacf9aeffc9a62e75339d73863b
 
         # Lemmatize
         if self.lemmatize:
