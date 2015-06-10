@@ -143,7 +143,6 @@ class BaseModel:
     # TODO (Daryl): Look into interleaving nouns/adjs with adverbs and other POS
     def combine_to_keyphrases(self, text, taggedWords, scores, min_num_labels):
         combinedKeyphraseScores = {}
-<<<<<<< HEAD
         sortedScores = sorted(scores.items(), key=lambda x:x[1], reverse=True)[:int(self.keywordThreshold*min_num_labels)]
         
         # Construct keyword set
