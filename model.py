@@ -168,7 +168,16 @@ class BaseModel:
             ) if keyphrase in combinedKeyphraseScores else keyphraseScores[keyphrase]
 
         keyphrases = sorted(combinedKeyphraseScores.keys(), key=combinedKeyphraseScores.get, reverse=True)
-        result = [' '.join(keyphrase) for keyphrase in keyphrases][:min_num_labels+self.numExtraLabels]
+        # TODO: Refine code for getting rid of repeated or similar keyphrases
+        result = []
+        for keyphrase in keyphrases:
+            if len(result) == min_num_labels+self.numExtraLabels:
+                break
+            if sum(word in k for word in keyphrase for k in result) < 5:
+                result.append(keyphrase)
+        result = [' '.join(keyphrase) for keyphrase in result]
+        
+        #result = [' '.join(keyphrase) for keyphrase in keyphrases][:min_num_labels+self.numExtraLabels]
 
         # If we haven't reached the minimum number of labels, add unigrams in order of score
         if self.lemmatize:
