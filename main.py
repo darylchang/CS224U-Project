@@ -16,9 +16,9 @@ import dill
 bigrams = ngrams.read_bigrams()
 trigrams = ngrams.read_trigrams()
 
-# model = DegreeCentralityModel(lengthPenaltyFn=lambda x: x**3/60. if x<4 else x/3., useCommunity=True)
-# results = model.evaluate(numExamples=5, compute_mistakes=True, verbose=False)
-
+# model = DegreeCentralityModel(lengthPenaltyFn=lambda x: x**3/60. if x<4 else x/3., useCommunity=True, windowSize=6)
+# results = model.evaluate(numExamples=15, compute_mistakes=True, verbose=False)
+# model.draw_graph('data/Inspec/Test/2113.abstr')
 
 # lengthPenaltyFn = lambda x: x**3/60. if x<4 else x/3.
 # ngramPenaltyFn = lambda length, count: 0.3 * float(length) / np.sqrt(count)
@@ -27,12 +27,13 @@ trigrams = ngrams.read_trigrams()
 # model = DegreeCentralityModel(lengthPenaltyFn=lengthPenaltyFn, useNgrams=[bigrams, trigrams], ngramPenaltyFn=ngramPenaltyFn, ngramAdjacentBoostFn=ngramAdjacentBoostFn, keywordThreshold=10)
 # model.evaluate(numExamples=50, compute_mistakes=True, verbose=False)
 
+
 options = dict()
 options['model'] = [PageRankModel]
 options['useNgrams'] = [[]]
 
 
-options['windowSize'] = [3]
+options['windowSize'] = [4]
 options['keywordThreshold'] = [6]
 options['ngramPenaltyParams'] = [0.05]
 options['ngramAdjacentBoostParams'] = [1/75.]
@@ -44,4 +45,4 @@ secondDenoms = [110.]
 combos = itertools.product(powers,firstDenoms,secondDenoms)
 options['lengthPenaltyParams'] = combos
 use_datasets = [INSPEC_DATASET]
-gridSearch(options, use_datasets=use_datasets, numExamples=None, compute_mistakes=True, verbose=True)
+gridSearch(options, use_datasets=use_datasets, numExamples=2, compute_mistakes=True, verbose=True)

@@ -14,10 +14,6 @@ class DegreeCentralityModel(BaseModel):
 
         # Get keywords by node centrality
         scores = nx.degree_centrality(G)
-        if 'linear diophantine equations' in text:
-            print
-            for keyword in sorted(scores.keys(), key=scores.get):
-                print '%s: %s' % (keyword, scores[keyword])
 
         # Community detection using Louvain algorithm
         if self.useCommunity:

@@ -7,6 +7,9 @@ import nltk
 from nltk.corpus import wordnet
 from nltk.tokenize import RegexpTokenizer
 import numpy as np
+from parse import *
+from matplotlib import pyplot as plt
+from subprocess import *
 
 
 class BaseModel:
@@ -45,7 +48,7 @@ class BaseModel:
         if self.stripPunct:
             pattern = r'''(?x)           # set flag to allow verbose regexps
                       ([A-Z]\.)+         # abbreviations, e.g. U.S.A.
-                      | \-?[\d\w]+([-']\w+)*    # words w/ optional internal hyphens/apostrophe
+                      | \-?[^\W_]+([-'/][^\W_]+)*    # words w/ optional internal hyphens/apostrophe
                       | \$?\d+(\.\d+)?%? # numbers, incl. currency and percentages
                       | [+/\-@&*]        # special characters with meanings
             '''
@@ -64,7 +67,8 @@ class BaseModel:
 
         # POS tagging
         if self.lemmatize or self.synFilter:
-            taggedWords = [(word, self.wordnetPosCode(tag)) for word, tag in nltk.pos_tag(words)]
+            taggedWords = self.tag(words)
+            # taggedWords = [(word, self.wordnetPosCode(tag)) for word, tag in nltk.pos_tag(words)]
 
         # Lemmatize
         if self.lemmatize:
@@ -72,6 +76,22 @@ class BaseModel:
         	words = [lemmatizer.lemmatize(word, tag) for word, tag in taggedWords]
 
         return taggedWords if self.synFilter else words
+
+    def tag(self, words):
+        words = ' '.join(words).encode('utf-8').strip() # Avoid ascii codec error
+        command = "apache-opennlp/bin/opennlp POSTagger apache-opennlp/models/en-pos-perceptron.bin"
+        p = Popen(command, shell=True, stdout=PIPE, stdin=PIPE, stderr=STDOUT)
+        output = p.communicate(input=words)[0].split('\n')[1]
+        result = []
+        for token in output.split():
+            if token.endswith('_``'):
+                print '\nRetrying POS tagging for %s' % (token)
+                p = Popen(command, shell=True, stdout=PIPE, stdin=PIPE, stderr=STDOUT)
+                token = p.communicate(input=token.split('_')[0])[0].split('\n')[1]
+                print '\tGot new token: %s' % (token)
+            word, tag = token.split('_')
+            result.append((word, self.wordnetPosCode(tag)))
+        return result
 
     # Maps from NLTK POS tags to WordNet POS tags
     def wordnetPosCode(self, tag):
@@ -85,12 +105,10 @@ class BaseModel:
             return wordnet.ADV
         else:
             return ''
-            # TODO (all): this was returning waaaaay too many nouns
-            # return wordnet.NOUN
 
     def create_graph(self, words, TODOdelete=False):
         cooccurrenceDict = cooccurrence.slidingWindowMatrix(words, self.windowSize, self.synFilter, self.stripStopWords, TODOdelete=TODOdelete)
-        return cooccurrenceDict, nx.DiGraph(cooccurrenceDict)
+        return cooccurrenceDict, nx.Graph(cooccurrenceDict)
 
     def addCommonNgramsAndScores(self, keywords, wordScores, keyphraseScores):
         for ngramsCounter in self.useNgrams:
@@ -160,3 +178,12 @@ class BaseModel:
 
     def evaluate(self, numExamples=None, compute_mistakes=False, verbose=False, use_datasets=DATASETS):
         return evaluate.evaluate_extractor(self.extract_keyphrases, numExamples, compute_mistakes, verbose, use_datasets)
+
+    def draw_graph(self, docName):
+        examples = inspec_data_reader()
+        docText = [text for filename, text, gold_labels in examples if filename == docName][0]
+        words = self.tokenize(docText) # Note: tuples if using a synFilter
+        cooccurrence_dict, G = self.create_graph(words)
+        G = G.to_undirected()
+        labels = nx.draw_graphviz(G, with_labels=True, edge_color='0.5', width=0.5, font_color='blue', node_color='0.5', node_size=800)
+        plt.show() 
