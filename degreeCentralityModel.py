@@ -23,4 +23,4 @@ class DegreeCentralityModel(BaseModel):
         #         clusters[cluster_id].append(node)
         #     scores = [{node: scores[node] for node in clusters[cluster_id]} for cluster_id in clusters]
 
-        return self.combine_to_keyphrases(text, taggedWords, scores, min_num_labels)
+        return self.combine_to_keyphrases(taggedWords, scores, min_num_labels)

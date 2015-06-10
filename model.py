@@ -11,6 +11,7 @@ from parse import *
 from matplotlib import pyplot as plt
 from subprocess import *
 from collections import defaultdict
+import re
 
 
 class BaseModel:
@@ -43,26 +44,11 @@ class BaseModel:
         self.wordsToLemmas = defaultdict(str)
 
     def preprocess(self, text):
-        # Strip punctuation if unneeded for co-occurrence counts
-        pattern = r'''(?x)           # set flag to allow verbose regexps
-                  ([A-Z]\.)+         # abbreviations, e.g. U.S.A.
-                  | \-?[^\W_]+([-'/][^\W_]+)*    # words w/ optional internal hyphens/apostrophe
-                  | \$?\d+(\.\d+)?%? # numbers, incl. currency and percentages
-                  | [+/\-@&*]        # special characters with meanings
-        '''
-        tokenizer = RegexpTokenizer(pattern)
-        tokens = tokenizer.tokenize(text)
-
         # Tokenize input
-        # pattern = r'([^\W_]|[\-])+'
-        # tokenizer = RegexpTokenizer(pattern)
-        # tokens = tokenizer.tokenize(text)
-
-        # Normalize words
-        words = [t.lower() for t in tokens]
-        
-        # POS tagging
-        self.taggedWords = [(word, self.wordnetPosCode(tag)) for word, tag in nltk.pos_tag(words)]
+        self.taggedWords = [tuple(taggedWord.split('_')) for taggedWord in text.split() 
+                            if not re.findall(r'[\W]', taggedWord[0])
+                            and len(taggedWord.split('_'))==2]
+        self.text = ' '.join([token.split('_')[0] for token in text.split()])
 
         # Lemmatize
         if self.lemmatize:
@@ -139,7 +125,7 @@ class BaseModel:
             return max([scores[lemma] for lemma in lemmas if lemma in scores])
 
     # TODO (Daryl): Look into interleaving nouns/adjs with adverbs and other POS
-    def combine_to_keyphrases(self, text, taggedTokens, scores, min_num_labels):
+    def combine_to_keyphrases(self, taggedTokens, scores, min_num_labels):
         combinedKeyphraseScores = {}
         sortedScores = sorted(scores.items(), key=lambda x:x[1], reverse=True)[:int(self.keywordThreshold*min_num_labels)]
         
@@ -158,9 +144,9 @@ class BaseModel:
                 keyphrase += (word,)
             else:
                 candidateKeyphrases = cooccurrence.findNgrams(keyphrase)
-                bestKeyphrase, bestKeyphraseScore = None, 0.
+                bestKeyphrase, bestKeyphraseScore = None, None
                 for candidateKeyphrase in candidateKeyphrases:
-                    if candidateKeyphrase and ' '.join(candidateKeyphrase) in text:
+                    if candidateKeyphrase and ' '.join(candidateKeyphrase) in self.text:
                         score = sum([self.get_best_score(scores, keyword) for keyword in candidateKeyphrase])
                         if self.lengthPenaltyFn:
                             # print 'Length penalty: %s being reduced from %s for length of %s' % (self.lengthPenaltyFn(len(keyphrase)), score, len(keyphrase))
