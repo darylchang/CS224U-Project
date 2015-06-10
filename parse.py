@@ -21,7 +21,7 @@ def handwritten_data_reader():
     # line of each file listed in handwritten_docs.txt is taken to be 
     data_dir = 'data/Handwritten/'
     with open(data_dir + 'handwritten_docs.txt', 'r') as docs_file:
-        filenames = [filename.strip() for filename in docs_file.readlines()]
+        filenames = [filename.strip() for filename in docs_file.readlines() if not filename.startswith('#')]
 
     examples = []
     for filename in filenames:

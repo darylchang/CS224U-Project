@@ -1,0 +1,6 @@
+ideal sliding mode; convex optimization; continuous convex-programming algorithms; exact penalty functions
+Ideal sliding mode in the problems of convex optimizations
+The characteristics of the sliding mode that appears with using continuous
+	convex-programming algorithms based on the exact penalty functions were
+	discussed. For the case under study, the ideal sliding mode was shown
+	to occur in the absence of infinite number of switchings

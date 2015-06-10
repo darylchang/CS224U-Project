@@ -49,7 +49,7 @@ class BaseModel:
         if self.stripPunct:
             pattern = r'''(?x)           # set flag to allow verbose regexps
                       ([A-Z]\.)+         # abbreviations, e.g. U.S.A.
-                      | \-?[^\W_]+([-'][^\W_]+)*    # words w/ optional internal hyphens/apostrophe
+                      | \-?[^\W_]+([-'/][^\W_]+)*    # words w/ optional internal hyphens/apostrophe
                       | \$?\d+(\.\d+)?%? # numbers, incl. currency and percentages
                       | [+/\-@&*]        # special characters with meanings
             '''
@@ -62,7 +62,13 @@ class BaseModel:
         words = [t.lower() for t in tokens]
         
         # POS tagging
+<<<<<<< HEAD
         taggedWords = [(word, self.wordnetPosCode(tag)) for word, tag in nltk.pos_tag(words)]
+=======
+        if self.lemmatize or self.synFilter:
+            taggedWords = self.tag(words)
+            # taggedWords = [(word, self.wordnetPosCode(tag)) for word, tag in nltk.pos_tag(words)]
+>>>>>>> 3885f7de01becaacf9aeffc9a62e75339d73863b
 
         # Lemmatize
         if self.lemmatize:
@@ -87,6 +93,11 @@ class BaseModel:
         output = p.communicate(input=words)[0].split('\n')[1]
         result = []
         for token in output.split():
+            if token.endswith('_``'):
+                print '\nRetrying POS tagging for %s' % (token)
+                p = Popen(command, shell=True, stdout=PIPE, stdin=PIPE, stderr=STDOUT)
+                token = p.communicate(input=token.split('_')[0])[0].split('\n')[1]
+                print '\tGot new token: %s' % (token)
             word, tag = token.split('_')
             result.append((word, self.wordnetPosCode(tag)))
         return result
@@ -136,6 +147,7 @@ class BaseModel:
     # TODO (Daryl): Look into interleaving nouns/adjs with adverbs and other POS
     def combine_to_keyphrases(self, text, taggedWords, scores, min_num_labels):
         combinedKeyphraseScores = {}
+<<<<<<< HEAD
         sortedScores = sorted(scores.items(), key=lambda x:x[1], reverse=True)[:int(self.keywordThreshold*min_num_labels)]
         
         # Construct keyword set
