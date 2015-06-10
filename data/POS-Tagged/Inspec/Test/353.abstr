@@ -1,0 +1,1 @@
+edit_n distance_n of_ run-length_n encoded_v strings_n let_v x_n and_ y_n be_v two_ run-length_n encoded_v strings_n ,_ of_ encoded_v lengths_n k_n and_ l_n ,_ respectively_r ._ we_ present_v a_ simple_n o_ (_ |_n x_n |_n l_n +_n |_n y_n |_n k_n )_ time_n algorithm_n that_ computes_v their_ edit_n distance_n
