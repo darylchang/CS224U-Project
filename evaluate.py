@@ -4,7 +4,6 @@ from pattern.en import singularize
 import sys
 from constants import *
 
-# TODO: Look into using R-precision both token-wise and keyphrase-wise (partial matching, Daryl)
 
 def F1(precision, recall):
     if precision + recall == 0:

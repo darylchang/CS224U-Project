@@ -26,9 +26,6 @@ def getSynFilteredNgram(synFilter, nGram):
             words.append(word)
     return words
 
-# TODO (all): Consider scoring using multiple window sizes, or else really
-#             limiting window size? For large N on the Inspec data set, there
-#             are very few ngrams created.
 def slidingWindowMatrix(words, N, synFilter, stripStopWords=True):
     cooccurrenceDict = defaultdict(lambda: defaultdict(lambda: defaultdict(int)))
     nGrams = findNgrams(words, N)
@@ -55,7 +52,6 @@ def rakeMatrix(words, delimiters, synFilter, stripStopWords=True):
     if frag:
         fragments.append(frag)
 
-    # TODO: Explore using set() for word occcurrences in window definition
     cooccurrenceDict = defaultdict(lambda: defaultdict(int))
     for frag in fragments: 
         frag = getSynFilteredNgram(synFilter, frag)
