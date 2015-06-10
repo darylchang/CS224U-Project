@@ -37,8 +37,8 @@ class PageRankModel(BaseModel):
 
     def extract_keyphrases(self, text, min_num_labels):
         # Tokenize text and create graph
-        words = self.tokenize(text) # Note: tuples if using a synFilter
-        cooccurrenceDict, G = self.create_graph(words, TODOdelete=('linear diophantine equations' in text))
+        words = self.preprocess(text) # Note: tuples if using a synFilter
+        cooccurrenceDict, G = self.create_graph(words)
 
         # Get keywords by node centrality
         scores = nx.pagerank(G, max_iter=500)

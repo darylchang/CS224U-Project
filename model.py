@@ -16,7 +16,6 @@ from collections import defaultdict
 class BaseModel:
 
     def __init__(self,
-        stripPunct=True,
         lemmatize=False,
         stripStopWords=True,
         synFilter=[wordnet.NOUN, wordnet.ADJ], 
@@ -29,7 +28,6 @@ class BaseModel:
         ngramPenaltyFn=None,
         ngramAdjacentBoostFn=None,
     ):
-        self.stripPunct = stripPunct
         self.lemmatize = lemmatize
         self.stripStopWords = stripStopWords
         self.synFilter = synFilter
@@ -44,47 +42,43 @@ class BaseModel:
         self.lemmasToWords = defaultdict(list)
         self.wordsToLemmas = defaultdict(str)
 
-    def tokenize(self, text):
+    def preprocess(self, text):
         # Strip punctuation if unneeded for co-occurrence counts
-        if self.stripPunct:
-            pattern = r'''(?x)           # set flag to allow verbose regexps
-                      ([A-Z]\.)+         # abbreviations, e.g. U.S.A.
-                      | \-?[^\W_]+([-'/][^\W_]+)*    # words w/ optional internal hyphens/apostrophe
-                      | \$?\d+(\.\d+)?%? # numbers, incl. currency and percentages
-                      | [+/\-@&*]        # special characters with meanings
-            '''
-            tokenizer = RegexpTokenizer(pattern)
-            tokens = tokenizer.tokenize(text)
-        else:
-            tokens = [word for sent in nltk.sent_tokenize(text) for word in nltk.word_tokenize(sent)]
+        pattern = r'''(?x)           # set flag to allow verbose regexps
+                  ([A-Z]\.)+         # abbreviations, e.g. U.S.A.
+                  | \-?[^\W_]+([-'/][^\W_]+)*    # words w/ optional internal hyphens/apostrophe
+                  | \$?\d+(\.\d+)?%? # numbers, incl. currency and percentages
+                  | [+/\-@&*]        # special characters with meanings
+        '''
+        tokenizer = RegexpTokenizer(pattern)
+        tokens = tokenizer.tokenize(text)
+
+        # Tokenize input
+        # pattern = r'([^\W_]|[\-])+'
+        # tokenizer = RegexpTokenizer(pattern)
+        # tokens = tokenizer.tokenize(text)
 
         # Normalize words
         words = [t.lower() for t in tokens]
         
         # POS tagging
-<<<<<<< HEAD
-        taggedWords = [(word, self.wordnetPosCode(tag)) for word, tag in nltk.pos_tag(words)]
-=======
-        if self.lemmatize or self.synFilter:
-            taggedWords = self.tag(words)
-            # taggedWords = [(word, self.wordnetPosCode(tag)) for word, tag in nltk.pos_tag(words)]
->>>>>>> 3885f7de01becaacf9aeffc9a62e75339d73863b
+        self.taggedWords = [(word, self.wordnetPosCode(tag)) for word, tag in nltk.pos_tag(words)]
 
         # Lemmatize
         if self.lemmatize:
             lemmatizer = nltk.WordNetLemmatizer()
-            taggedLemmas = []
+            self.taggedLemmas = []
             self.lemmasToWords = defaultdict(list)
             self.wordsToLemmas = defaultdict(list)
 
-            for word, tag in taggedWords:
+            for word, tag in self.taggedWords:
                 lemma = lemmatizer.lemmatize(word, tag) if tag else word
                 self.lemmasToWords[lemma].append(word)
                 self.wordsToLemmas[word].append(lemma)
-                taggedLemmas.append((lemma,tag))
-            return taggedLemmas
+                self.taggedLemmas.append((lemma,tag))
+            return self.taggedLemmas
         else:
-            return taggedWords
+            return self.taggedWords
 
     def tag(self, words):
         words = ' '.join(words).encode('utf-8').strip() # Avoid ascii codec error
@@ -145,9 +139,8 @@ class BaseModel:
             return max([scores[lemma] for lemma in lemmas if lemma in scores])
 
     # TODO (Daryl): Look into interleaving nouns/adjs with adverbs and other POS
-    def combine_to_keyphrases(self, text, taggedWords, scores, min_num_labels):
+    def combine_to_keyphrases(self, text, taggedTokens, scores, min_num_labels):
         combinedKeyphraseScores = {}
-<<<<<<< HEAD
         sortedScores = sorted(scores.items(), key=lambda x:x[1], reverse=True)[:int(self.keywordThreshold*min_num_labels)]
         
         # Construct keyword set
@@ -155,30 +148,28 @@ class BaseModel:
             keywords = set([word for lemma, score in sortedScores for word in self.lemmasToWords[lemma]])
         else:
             keywords = set([word for word, score in sortedScores])
-        
-        # Initialize keyphraseScores with unigrams, choose max score out of all associated lemmas
-        keyphraseScores = {(keyword,) : self.get_best_score(scores, keyword) for keyword in keywords}
-    
-        # Adjust for length penalty
-        if self.lengthPenaltyFn:
-            for singleKeyword in keyphraseScores:
-                keyphraseScores[singleKeyword] -= self.lengthPenaltyFn(1)
 
+        keyphraseScores = {}
+    
         # Combine keywords into keyphrases
         keyphrase = ()
-        for word, tag in taggedWords:
+        for word, tag in self.taggedWords:
             if word in keywords:
                 keyphrase += (word,)
             else:
                 candidateKeyphrases = cooccurrence.findNgrams(keyphrase)
+                bestKeyphrase, bestKeyphraseScore = None, 0.
                 for candidateKeyphrase in candidateKeyphrases:
                     if candidateKeyphrase and ' '.join(candidateKeyphrase) in text:
                         score = sum([self.get_best_score(scores, keyword) for keyword in candidateKeyphrase])
                         if self.lengthPenaltyFn:
                             # print 'Length penalty: %s being reduced from %s for length of %s' % (self.lengthPenaltyFn(len(keyphrase)), score, len(keyphrase))
                             score -= self.lengthPenaltyFn(len(candidateKeyphrase))
-                        keyphraseScores[candidateKeyphrase] = score
-                keyphrase = ()
+                        if score > bestKeyphraseScore:
+                            bestKeyphrase, bestKeyphraseScore = candidateKeyphrase, score
+                if bestKeyphrase:
+                    keyphraseScores[bestKeyphrase] = bestKeyphraseScore
+                    keyphrase = ()
 
         if self.useNgrams:
             self.addCommonNgramsAndScores(keywords, scores, keyphraseScores)
